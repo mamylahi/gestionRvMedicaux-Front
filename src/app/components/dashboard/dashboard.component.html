@@ -1,0 +1,426 @@
+<div class="min-h-screen bg-gray-50 p-6 ml-64 transition-all duration-300">
+  <!-- En-tête -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">
+      {{ getGreeting() }}, {{ userName }} !
+    </h1>
+    <p class="text-gray-600 mt-1 text-sm">
+      Bienvenue sur votre tableau de bord Administrateur
+    </p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex justify-center items-center h-48">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+  </div>
+
+  <!-- Dashboard Admin -->
+  <div *ngIf="!loading && isAdmin" class="space-y-6">
+    <!-- Statistiques principales -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <!-- Médecins -->
+      <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="p-2 bg-green-50 rounded-lg">
+            <i class="fas fa-user-md text-green-600 text-sm"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-xs font-medium text-gray-500">Médecins</p>
+            <p class="text-lg font-bold text-gray-900">{{ dashboardData.totalMedecins || 0 }}</p>
+            <p class="text-xs text-green-600">{{ dashboardData.medecinsDisponibles || 0 }} disponibles</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Patients -->
+      <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="p-2 bg-purple-50 rounded-lg">
+            <i class="fas fa-user-injured text-purple-600 text-sm"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-xs font-medium text-gray-500">Patients</p>
+            <p class="text-lg font-bold text-gray-900">{{ dashboardData.totalPatients || 0 }}</p>
+            <p class="text-xs text-purple-600">+{{ dashboardData.nouveauxPatients || 0 }} ce mois</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rendez-vous -->
+      <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="p-2 bg-yellow-50 rounded-lg">
+            <i class="fas fa-calendar-alt text-yellow-600 text-sm"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-xs font-medium text-gray-500">RDV Total</p>
+            <p class="text-lg font-bold text-gray-900">{{ dashboardData.totalRendezVous || 0 }}</p>
+            <p class="text-xs text-yellow-600">{{ dashboardData.rdvAujourdhui || 0 }} aujourd'hui</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Consultations -->
+      <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="p-2 bg-indigo-50 rounded-lg">
+            <i class="fas fa-file-medical text-indigo-600 text-sm"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-xs font-medium text-gray-500">Consultations</p>
+            <p class="text-lg font-bold text-gray-900">{{ dashboardData.consultationsCeMois || 0 }}</p>
+            <p class="text-xs text-indigo-600">ce mois</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Revenus -->
+      <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="p-2 bg-emerald-50 rounded-lg">
+            <i class="fas fa-money-bill-wave text-emerald-600 text-sm"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-xs font-medium text-gray-500">Revenus</p>
+            <p class="text-lg font-bold text-gray-900">{{ (dashboardData.revenuCeMois || 0) | number:'1.0-0' }}€</p>
+            <p class="text-xs text-emerald-600">ce mois</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deuxième ligne de statistiques -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Rendez-vous par statut -->
+      <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">RDV par statut</h3>
+        <div class="space-y-3">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-blue-50 p-3 rounded-lg">
+              <p class="text-sm text-blue-700">En attente</p>
+              <p class="text-xl font-bold text-blue-900">{{ dashboardData.rdvEnAttente || 0 }}</p>
+            </div>
+            <div class="bg-green-50 p-3 rounded-lg">
+              <p class="text-sm text-green-700">Confirmés</p>
+              <p class="text-xl font-bold text-green-900">{{ dashboardData.rdvConfirmes || 0 }}</p>
+            </div>
+            <div class="bg-red-50 p-3 rounded-lg">
+              <p class="text-sm text-red-700">Annulés</p>
+              <p class="text-xl font-bold text-red-900">{{ dashboardData.rdvAnnules || 0 }}</p>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <p class="text-sm text-gray-700">Terminés</p>
+              <p class="text-xl font-bold text-gray-900">{{ dashboardData.rdvTermines || 0 }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Performances financières -->
+      <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Performances financières</h3>
+        <div class="space-y-4">
+          <div>
+            <p class="text-sm text-gray-500">Revenu total</p>
+            <p class="text-2xl font-bold text-gray-900">{{ (dashboardData.revenuTotal || 0) | number:'1.0-0' }}€</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Revenu ce mois</p>
+            <p class="text-lg font-semibold text-emerald-600">{{ (dashboardData.revenuCeMois || 0) | number:'1.0-0' }}€</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Actions Rapides</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <a routerLink="/users" class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+          <i class="fas fa-users text-blue-600 text-base mr-2"></i>
+          <span class="font-medium text-gray-700">Utilisateurs</span>
+        </a>
+        <a routerLink="/medecins" class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+          <i class="fas fa-user-md text-green-600 text-base mr-2"></i>
+          <span class="font-medium text-gray-700">Médecins</span>
+        </a>
+        <a routerLink="/patients" class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+          <i class="fas fa-user-injured text-purple-600 text-base mr-2"></i>
+          <span class="font-medium text-gray-700">Patients</span>
+        </a>
+        <a routerLink="/rendez-vous" class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+          <i class="fas fa-calendar-check text-yellow-600 text-base mr-2"></i>
+          <span class="font-medium text-gray-700">Rendez-vous</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Médecin -->
+  <div *ngIf="!loading && isMedecin" class="space-y-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="p-2 bg-blue-50 rounded-lg">
+            <i class="fas fa-calendar-day text-blue-600 text-sm"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-xs font-medium text-gray-500">RDV Aujourd'hui</p>
+            <p class="text-lg font-bold text-gray-900">{{ dashboardData.rdvAujourdhui || 0 }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="p-2 bg-green-50 rounded-lg">
+            <i class="fas fa-user-injured text-green-600 text-sm"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-xs font-medium text-gray-500">Mes Patients</p>
+            <p class="text-lg font-bold text-gray-900">{{ dashboardData.totalPatients || 0 }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="p-2 bg-purple-50 rounded-lg">
+            <i class="fas fa-file-medical text-purple-600 text-sm"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-xs font-medium text-gray-500">Consultations</p>
+            <p class="text-lg font-bold text-gray-900">{{ dashboardData.totalConsultations || 0 }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="p-2 bg-red-50 rounded-lg">
+            <i class="fas fa-clock text-red-600 text-sm"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-xs font-medium text-gray-500">RDV en Attente</p>
+            <p class="text-lg font-bold text-gray-900">{{ dashboardData.rdvEnAttente || 0 }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prochain rendez-vous -->
+    <div *ngIf="dashboardData.prochainRendezVous" class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Prochain Rendez-vous</h2>
+      <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+        <div>
+          <p class="font-semibold text-gray-900">{{ dashboardData.prochainRendezVous.patient?.nom || dashboardData.prochainRendezVous.patient?.name || 'Patient' }}</p>
+          <p class="text-gray-600 text-sm">{{ dashboardData.prochainRendezVous.date_rendezvous || dashboardData.prochainRendezVous.date | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+        <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+          {{ dashboardData.prochainRendezVous.statut || 'Confirmé' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Actions rapides médecin -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <a routerLink="/mes-rendez-vous" class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <i class="fas fa-calendar-alt text-blue-600 text-xl mr-3"></i>
+          <div>
+            <h3 class="font-bold text-gray-900 text-sm">Mes Rendez-vous</h3>
+            <p class="text-gray-600 text-xs">Gérer mon agenda</p>
+          </div>
+        </div>
+      </a>
+
+      <a routerLink="/mes-patients" class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <i class="fas fa-user-injured text-green-600 text-xl mr-3"></i>
+          <div>
+            <h3 class="font-bold text-gray-900 text-sm">Mes Patients</h3>
+            <p class="text-gray-600 text-xs">Voir mes patients</p>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Dashboard Secrétaire -->
+  <div *ngIf="!loading && isSecretaire" class="space-y-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="p-2 bg-blue-50 rounded-lg">
+            <i class="fas fa-calendar-alt text-blue-600 text-sm"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-xs font-medium text-gray-500">Total RDV</p>
+            <p class="text-lg font-bold text-gray-900">{{ dashboardData.totalRendezVous || 0 }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="p-2 bg-green-50 rounded-lg">
+            <i class="fas fa-calendar-day text-green-600 text-sm"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-xs font-medium text-gray-500">RDV Aujourd'hui</p>
+            <p class="text-lg font-bold text-gray-900">{{ dashboardData.rendezVousAujourdhui || 0 }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="p-2 bg-yellow-50 rounded-lg">
+            <i class="fas fa-money-bill-wave text-yellow-600 text-sm"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-xs font-medium text-gray-500">Paiements En Attente</p>
+            <p class="text-lg font-bold text-gray-900">{{ dashboardData.paiementsEnAttente || 0 }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="p-2 bg-purple-50 rounded-lg">
+            <i class="fas fa-file-invoice-dollar text-purple-600 text-sm"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-xs font-medium text-gray-500">Total Paiements</p>
+            <p class="text-lg font-bold text-gray-900">{{ dashboardData.totalPaiements || 0 }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions rapides secrétaire -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <a routerLink="/rendez-vous" class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow text-center">
+        <i class="fas fa-calendar-plus text-blue-600 text-2xl mb-2"></i>
+        <h3 class="font-bold text-gray-900 text-sm">Gérer RDV</h3>
+        <p class="text-gray-600 text-xs">Planifier les rendez-vous</p>
+      </a>
+
+      <a routerLink="/dossiers-medicaux" class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow text-center">
+        <i class="fas fa-folder-medical text-green-600 text-2xl mb-2"></i>
+        <h3 class="font-bold text-gray-900 text-sm">Dossiers</h3>
+        <p class="text-gray-600 text-xs">Gérer les dossiers médicaux</p>
+      </a>
+
+      <a routerLink="/paiements" class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow text-center">
+        <i class="fas fa-money-check text-yellow-600 text-2xl mb-2"></i>
+        <h3 class="font-bold text-gray-900 text-sm">Paiements</h3>
+        <p class="text-gray-600 text-xs">Gérer les paiements</p>
+      </a>
+    </div>
+  </div>
+
+  <!-- Dashboard Patient -->
+  <div *ngIf="!loading && isPatient" class="space-y-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="p-2 bg-blue-50 rounded-lg">
+            <i class="fas fa-calendar-check text-blue-600 text-sm"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-xs font-medium text-gray-500">Mes Rendez-vous</p>
+            <p class="text-lg font-bold text-gray-900">{{ dashboardData.mesRendezVous || 0 }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="p-2 bg-green-50 rounded-lg">
+            <i class="fas fa-file-medical-alt text-green-600 text-sm"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-xs font-medium text-gray-500">Mes Consultations</p>
+            <p class="text-lg font-bold text-gray-900">{{ dashboardData.mesConsultations || 0 }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="p-2 bg-purple-50 rounded-lg">
+            <i class="fas fa-prescription-bottle-alt text-purple-600 text-sm"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-xs font-medium text-gray-500">Ordonnances</p>
+            <p class="text-lg font-bold text-gray-900">{{ dashboardData.ordonnances || 0 }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="p-2 bg-yellow-50 rounded-lg">
+            <i class="fas fa-receipt text-yellow-600 text-sm"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-xs font-medium text-gray-500">Paiements</p>
+            <p class="text-lg font-bold text-gray-900">{{ dashboardData.mesPaiements || 0 }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prochain rendez-vous patient -->
+    <div *ngIf="dashboardData.prochainRendezVous" class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Mon Prochain Rendez-vous</h2>
+      <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+        <div class="flex items-center">
+          <i class="fas fa-user-md text-green-600 text-xl mr-3"></i>
+          <div>
+            <p class="font-semibold text-gray-900">Dr. {{ dashboardData.prochainRendezVous.medecin?.nom || dashboardData.prochainRendezVous.medecin?.name || 'Médecin' }}</p>
+            <p class="text-gray-600 text-sm">{{ dashboardData.prochainRendezVous.date_rendezvous || dashboardData.prochainRendezVous.date | date:'dd/MM/yyyy à HH:mm' }}</p>
+            <p class="text-xs text-gray-500">{{ dashboardData.prochainRendezVous.medecin?.specialite || 'Spécialité' }}</p>
+          </div>
+        </div>
+        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+          {{ dashboardData.prochainRendezVous.statut || 'Confirmé' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Actions rapides patient -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <a routerLink="/mes-rendez-vous" class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <i class="fas fa-calendar-plus text-blue-600 text-xl mr-3"></i>
+          <div>
+            <h3 class="font-bold text-gray-900 text-sm">Prendre RDV</h3>
+            <p class="text-gray-600 text-xs">Réserver un nouveau rendez-vous</p>
+          </div>
+        </div>
+      </a>
+
+      <a routerLink="/mon-dossier" class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <i class="fas fa-folder-open text-green-600 text-xl mr-3"></i>
+          <div>
+            <h3 class="font-bold text-gray-900 text-sm">Mon Dossier</h3>
+            <p class="text-gray-600 text-xs">Consulter mon dossier médical</p>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Message si non connecté -->
+  <div *ngIf="!loading && !isLoggedIn" class="text-center py-12">
+    <i class="fas fa-exclamation-triangle text-yellow-500 text-4xl mb-4"></i>
+    <h2 class="text-xl font-bold text-gray-900 mb-2">Non connecté</h2>
+    <p class="text-gray-600 mb-6">Veuillez vous connecter pour accéder à votre tableau de bord.</p>
+    <a routerLink="/login" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+      Se connecter
+    </a>
+  </div>
+</div>

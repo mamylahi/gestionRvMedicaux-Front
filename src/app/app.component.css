@@ -1,0 +1,36 @@
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.content-area {
+  flex: 1;
+  margin-left: 280px;
+  padding: 1rem;
+  overflow-y: auto;
+  background-color: #f8fafc;
+  transition: margin-left 0.3s ease;
+}
+
+.sidebar.collapsed ~ .content-area {
+  margin-left: 70px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .content-area {
+    margin-left: 0;
+    padding: 0.5rem;
+  }
+
+  .sidebar.collapsed ~ .content-area {
+    margin-left: 0;
+  }
+}

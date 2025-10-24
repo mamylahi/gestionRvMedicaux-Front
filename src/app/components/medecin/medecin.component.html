@@ -1,0 +1,258 @@
+<div class="min-h-screen bg-gray-50 ml-64 p-6 transition-all duration-300">
+  <!-- En-tête -->
+  <div class="mb-8">
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Gestion des Médecins</h1>
+        <p class="text-gray-600 mt-2">Liste des médecins de l'établissement</p>
+      </div>
+      <button
+        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center transition-colors"
+        routerLink="/medecins/ajouter">
+        <i class="fas fa-plus mr-2"></i>
+        Ajouter un médecin
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtres et Recherche -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+      <!-- Recherche -->
+      <div class="lg:col-span-2">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Rechercher par nom, numéro
+        </label>
+        <div class="relative">
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            (input)="onSearch()"
+            placeholder="Nom, prénom, numéro..."
+            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+          <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+        </div>
+      </div>
+
+      <!-- Filtre Spécialité -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Spécialité
+        </label>
+        <select
+          [(ngModel)]="selectedSpecialiteId"
+          (change)="onFilterBySpecialite()"
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-colors">
+          <option value="">Toutes les spécialités</option>
+          <option *ngFor="let spec of specialites" [value]="spec.id">
+            {{ spec.nom }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Filtre Statut -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Statut
+        </label>
+        <select
+          [(ngModel)]="filterDisponible"
+          (change)="onSearch()"
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-colors">
+          <option value="">Tous les statuts</option>
+          <option value="true">Disponible</option>
+          <option value="false">Non disponible</option>
+        </select>
+      </div>
+
+      <!-- Bouton Réinitialiser -->
+      <div class="flex items-end">
+        <button
+          (click)="onResetFilters()"
+          class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg font-medium flex items-center justify-center transition-colors">
+          <i class="fas fa-redo mr-2"></i>
+          Réinitialiser
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-center items-center py-12">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+      <p class="text-gray-600">Chargement des médecins...</p>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage && !isLoading" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+    <div class="flex items-center">
+      <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+      <p class="text-red-700">{{ errorMessage }}</p>
+    </div>
+  </div>
+
+  <!-- Statistiques -->
+  <div *ngIf="!isLoading && !errorMessage" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center">
+        <div class="p-3 bg-blue-100 rounded-lg mr-4">
+          <i class="fas fa-user-md text-blue-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-600">Total Médecins</p>
+          <p class="text-2xl font-bold text-gray-900">{{ medecins.length }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center">
+        <div class="p-3 bg-green-100 rounded-lg mr-4">
+          <i class="fas fa-check-circle text-green-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-600">Disponibles</p>
+          <p class="text-2xl font-bold text-gray-900">
+            {{ getAvailableMedecinsCount() }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center">
+        <div class="p-3 bg-purple-100 rounded-lg mr-4">
+          <i class="fas fa-stethoscope text-purple-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-600">Spécialités</p>
+          <p class="text-2xl font-bold text-gray-900">{{ specialites.length }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center">
+        <div class="p-3 bg-orange-100 rounded-lg mr-4">
+          <i class="fas fa-clock text-orange-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-600">Non disponibles</p>
+          <p class="text-2xl font-bold text-gray-900">
+            {{ getUnavailableMedecinsCount() }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Liste des Médecins -->
+  <div *ngIf="!isLoading && !errorMessage">
+    <!-- En-tête résultats -->
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-semibold text-gray-900">
+        {{ filteredMedecins.length }} médecin(s) trouvé(s)
+      </h2>
+      <div class="text-sm text-gray-500">
+        Affichage de {{ filteredMedecins.length }} sur {{ medecins.length }}
+      </div>
+    </div>
+
+    <!-- Grid des médecins -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <!-- Carte Médecin -->
+      <div *ngFor="let medecin of filteredMedecins"
+           class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
+
+        <!-- En-tête carte -->
+        <div class="p-6 border-b border-gray-100">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h3 class="text-lg font-bold text-gray-900">
+                {{ getMedecinName(medecin) }}
+              </h3>
+              <div class="flex items-center mt-1">
+                <span [ngClass]="{
+                  'bg-green-100 text-green-800': medecin.disponible,
+                  'bg-red-100 text-red-800': !medecin.disponible
+                }" class="px-2 py-1 rounded-full text-xs font-medium">
+                  <i class="fas fa-circle mr-1 text-[10px]"></i>
+                  {{ medecin.disponible ? 'Disponible' : 'Non disponible' }}
+                </span>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="text-sm text-gray-500">N°: {{ medecin.numero_medecin }}</p>
+            </div>
+          </div>
+
+          <!-- Informations principales -->
+          <div class="space-y-3">
+            <div class="flex items-center text-gray-600">
+              <i class="fas fa-briefcase-medical w-5 mr-3 text-blue-500"></i>
+              <span class="text-sm">{{ getSpecialiteName(medecin) }}</span>
+            </div>
+
+            <div class="flex items-center text-gray-600">
+              <i class="fas fa-envelope w-5 mr-3 text-blue-500"></i>
+              <span class="text-sm">{{ medecin.user?.email }}</span>
+            </div>
+
+            <div class="flex items-center text-gray-600">
+              <i class="fas fa-phone w-5 mr-3 text-blue-500"></i>
+              <span class="text-sm">{{ medecin.user?.telephone || 'Non renseigné' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Informations secondaires -->
+        <div class="p-6 bg-gray-50 rounded-b-xl">
+          <div class="flex justify-between items-center text-sm text-gray-500 mb-4">
+            <div class="flex items-center">
+              <i class="fas fa-calendar-plus mr-2"></i>
+              <span>Créé le: {{ medecin.created_at | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex justify-between space-x-2">
+            <button
+              (click)="onView(medecin.id)"
+              class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-lg text-sm font-medium flex items-center justify-center transition-colors">
+              <i class="fas fa-eye mr-2"></i>
+              Voir
+            </button>
+
+            <button
+              (click)="onEdit(medecin.id)"
+              class="flex-1 bg-green-50 hover:bg-green-100 text-green-700 px-3 py-2 rounded-lg text-sm font-medium flex items-center justify-center transition-colors">
+              <i class="fas fa-edit mr-2"></i>
+              Modifier
+            </button>
+            <button
+              (click)="onDelete(medecin.id)"
+              class="flex-1 bg-red-50 hover:bg-red-100 text-red-700 px-3 py-2 rounded-lg text-sm font-medium flex items-center justify-center transition-colors">
+              <i class="fas fa-trash mr-2"></i>
+              Supprimer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message aucun résultat -->
+    <div *ngIf="filteredMedecins.length === 0 && !isLoading"
+         class="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-200">
+      <i class="fas fa-user-md text-gray-300 text-5xl mb-4"></i>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">Aucun médecin trouvé</h3>
+      <p class="text-gray-500 mb-4">Aucun médecin ne correspond à vos critères de recherche.</p>
+      <button
+        (click)="onResetFilters()"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+        Réinitialiser les filtres
+      </button>
+    </div>
+  </div>
+</div>

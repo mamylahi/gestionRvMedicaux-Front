@@ -1,0 +1,170 @@
+<div class="container-fluid p-4">
+  <div class="card shadow-sm">
+    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+      <h4 class="mb-0">
+        <i class="fas fa-calendar-check me-2"></i>Gestion des Disponibilités
+      </h4>
+      <button class="btn btn-light btn-sm" (click)="onAdd()">
+        <i class="fas fa-plus me-1"></i>Nouvelle Disponibilité
+      </button>
+    </div>
+
+    <div class="card-body">
+      <!-- Filtres -->
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="fas fa-search"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Rechercher un médecin..."
+              [(ngModel)]="searchTerm"
+              (input)="onSearch()">
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <select
+            class="form-select"
+            [(ngModel)]="selectedMedecinId"
+            (change)="onFilterByMedecin()">
+            <option value="">Tous les médecins</option>
+            <option *ngFor="let medecin of medecins" [value]="medecin.id">
+              Dr. {{ medecin?.user?.nom }} {{ medecin?.user?.prenom }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <input
+            type="date"
+            class="form-control"
+            [(ngModel)]="startDate"
+            placeholder="Date début">
+        </div>
+
+        <div class="col-md-2">
+          <input
+            type="date"
+            class="form-control"
+            [(ngModel)]="endDate"
+            placeholder="Date fin">
+        </div>
+
+        <div class="col-md-1">
+          <div class="btn-group w-100">
+            <button
+              class="btn btn-outline-success btn-sm"
+              (click)="onFilterByDateRange()"
+              title="Filtrer">
+              <i class="fas fa-filter"></i>
+            </button>
+            <button
+              class="btn btn-outline-secondary btn-sm"
+              (click)="onResetFilters()"
+              title="Réinitialiser">
+              <i class="fas fa-redo"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-12 text-end">
+          <span class="badge bg-success">
+            {{ filteredDisponibilites.length }} disponibilité(s)
+          </span>
+        </div>
+      </div>
+
+      <!-- Message d'erreur -->
+      <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>{{ errorMessage }}
+        <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="isLoading" class="text-center py-5">
+        <div class="spinner-border text-success" role="status">
+          <span class="visually-hidden">Chargement...</span>
+        </div>
+      </div>
+
+      <!-- Cards Grid -->
+      <div *ngIf="!isLoading" class="row g-3">
+        <div class="col-md-6 col-lg-4" *ngFor="let dispo of filteredDisponibilites">
+          <div class="card h-100 shadow-sm border-success">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <h5 class="card-title text-success mb-0">
+                  <i class="fas fa-user-md me-2"></i>{{ getMedecinName(dispo) }}
+                </h5>
+                <span class="badge bg-success">ID: {{ dispo.id }}</span>
+              </div>
+
+              <div class="mb-2">
+                <small class="text-muted">
+                  <i class="fas fa-calendar-alt me-1"></i>
+                  <strong>Début:</strong> {{ dispo.date_debut | date:'dd/MM/yyyy HH:mm' }}
+                </small>
+              </div>
+
+              <div class="mb-2">
+                <small class="text-muted">
+                  <i class="fas fa-calendar-alt me-1"></i>
+                  <strong>Fin:</strong> {{ dispo.date_fin | date:'dd/MM/yyyy HH:mm' }}
+                </small>
+              </div>
+
+              <div class="mb-2">
+                <span class="badge" [ngClass]="dispo.recurrent ? 'bg-info' : 'bg-secondary'">
+                  <i class="fas fa-sync-alt me-1"></i>
+                  {{ dispo.recurrent ? 'Récurrent' : 'Ponctuel' }}
+                </span>
+              </div>
+
+              <div class="mt-3">
+                <span
+                  class="badge"
+                  [ngClass]="{
+                    'bg-success': isActive(dispo.date_debut, dispo.date_fin),
+                    'bg-warning': !isActive(dispo.date_debut, dispo.date_fin) && !isExpired(dispo.date_debut),
+                    'bg-secondary': isExpired(dispo.date_debut)
+                  }">
+                  <i class="fas fa-circle me-1"></i>
+                  {{ isActive(dispo.date_debut, dispo.date_fin) ? 'Actif' :
+                  isExpired(dispo.date_debut) ? 'Expiré' : 'À venir' }}
+                </span>
+              </div>
+            </div>
+            <div class="card-footer bg-transparent border-success">
+              <div class="btn-group w-100">
+                <button class="btn btn-sm btn-outline-success" (click)="onView(dispo.id)" title="Voir">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-warning" (click)="onEdit(dispo.id)" title="Modifier">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="onDelete(dispo.id)" title="Supprimer">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="col-12" *ngIf="filteredDisponibilites.length === 0">
+          <div class="text-center text-muted py-5">
+            <i class="fas fa-calendar-times fa-4x mb-3 d-block text-success"></i>
+            <h5>Aucune disponibilité trouvée</h5>
+            <p>Commencez par créer une nouvelle disponibilité</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

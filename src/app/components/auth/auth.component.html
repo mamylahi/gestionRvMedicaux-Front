@@ -1,0 +1,153 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-100 flex items-center justify-center p-4">
+  <div class="w-full max-w-md">
+    <!-- Carte principale -->
+    <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
+
+      <!-- En-tête avec illustration -->
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-8 text-center relative overflow-hidden">
+        <!-- Effet de vague décoratif -->
+        <div class="absolute top-0 left-0 w-full h-full opacity-10">
+          <div class="absolute -top-10 -left-10 w-32 h-32 bg-white rounded-full"></div>
+          <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
+        </div>
+
+        <div class="relative z-10">
+          <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+          </div>
+          <h1 class="text-3xl font-bold text-white mb-2">Bienvenue</h1>
+          <p class="text-blue-100 text-lg">Connectez-vous à votre compte</p>
+        </div>
+      </div>
+
+      <!-- Corps du formulaire -->
+      <div class="p-8">
+        <form [formGroup]="loginForm" (ngSubmit)="login()" class="space-y-6">
+          <!-- Champ Email -->
+          <div class="space-y-2">
+            <label class="block text-sm font-semibold text-gray-700">
+              Adresse Email
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+                </svg>
+              </div>
+              <input
+                type="email"
+                formControlName="email"
+                class="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-gray-50/50"
+                placeholder="votre@email.com"
+                [class]="isFieldInvalid(loginForm, 'email') ?
+                  'border-red-500 ring-2 ring-red-200 bg-red-50/50' :
+                  'border-gray-300'">
+            </div>
+            <div *ngIf="isFieldInvalid(loginForm, 'email')" class="flex items-center space-x-2 text-red-600 text-sm">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+              </svg>
+              <span *ngIf="loginEmail?.errors?.['required']">L'email est requis</span>
+              <span *ngIf="loginEmail?.errors?.['email']">Format d'email invalide</span>
+            </div>
+          </div>
+
+          <!-- Champ Mot de passe -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="block text-sm font-semibold text-gray-700">
+                Mot de passe
+              </label>
+              <a href="#" class="text-sm text-blue-600 hover:text-blue-800 transition-colors">
+                Mot de passe oublié ?
+              </a>
+            </div>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+              </div>
+              <input
+                type="password"
+                formControlName="password"
+                class="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-gray-50/50"
+                placeholder="Votre mot de passe"
+                [class]="isFieldInvalid(loginForm, 'password') ?
+                  'border-red-500 ring-2 ring-red-200 bg-red-50/50' :
+                  'border-gray-300'">
+            </div>
+            <div *ngIf="isFieldInvalid(loginForm, 'password')" class="flex items-center space-x-2 text-red-600 text-sm">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+              </svg>
+              <span *ngIf="loginPassword?.errors?.['required']">Le mot de passe est requis</span>
+              <span *ngIf="loginPassword?.errors?.['minlength']">Minimum 6 caractères</span>
+            </div>
+          </div>
+
+          <!-- Case à cocher "Se souvenir de moi" -->
+          <div class="flex items-center space-x-3">
+            <input type="checkbox" id="remember" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+            <label for="remember" class="text-sm text-gray-700">Se souvenir de moi</label>
+          </div>
+
+          <!-- Bouton de connexion -->
+          <button
+            type="submit"
+            class="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-4 px-6 rounded-xl hover:from-blue-700 hover:to-indigo-800 focus:ring-4 focus:ring-blue-200 focus:ring-offset-2 transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg shadow-blue-500/25"
+            [disabled]="isLoading">
+            <div class="flex items-center justify-center space-x-3">
+              <span *ngIf="isLoading" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></span>
+              <span class="font-semibold text-lg">
+                {{ isLoading ? 'Connexion...' : 'Se connecter' }}
+              </span>
+            </div>
+          </button>
+        </form>
+
+        <!-- Séparateur -->
+        <div class="mt-8 flex items-center">
+          <div class="flex-1 border-t border-gray-300"></div>
+          <span class="px-4 text-sm text-gray-500">ou</span>
+          <div class="flex-1 border-t border-gray-300"></div>
+        </div>
+
+        <!-- Lien d'inscription -->
+        <div class="mt-6 text-center">
+          <p class="text-gray-600">
+            Pas encore de compte ?
+            <a (click)="switchMode()" class="text-blue-600 hover:text-blue-800 font-semibold cursor-pointer transition-colors ml-1">
+              S'inscrire
+            </a>
+          </p>
+        </div>
+      </div>
+
+      <!-- Pied de page -->
+      <div class="bg-gray-50 px-8 py-4 border-t border-gray-200">
+        <div class="flex items-center justify-center space-x-2 text-sm text-gray-600">
+          <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          <span>Vos données sont sécurisées et confidentielles</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message de bienvenue -->
+    <div class="mt-8 text-center">
+      <h2 class="text-2xl font-bold text-gray-800 mb-3 flex items-center justify-center">
+        <svg class="w-8 h-8 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd"></path>
+        </svg>
+        MediCare Pro
+      </h2>
+      <p class="text-gray-600 text-lg">
+        Votre santé, notre priorité
+      </p>
+    </div>
+  </div>
+</div>

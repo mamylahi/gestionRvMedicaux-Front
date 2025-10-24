@@ -1,0 +1,59 @@
+.sidebar {
+  width: 16rem; /* 64 */
+}
+
+.sidebar.collapsed {
+  width: 4rem; /* 16 */
+}
+
+.sidebar-nav {
+  max-height: calc(100vh - 8rem);
+}
+
+/* Scrollbar personnalisé */
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar:not(.collapsed) {
+    transform: translateX(0);
+  }
+
+  .sidebar.collapsed {
+    transform: translateX(-100%);
+  }
+
+  @media (max-width: 768px) {
+    .ml-64 {
+      margin-left: 0 !important;
+    }
+
+    .sidebar:not(.collapsed) ~ * .ml-64 {
+      margin-left: 0 !important;
+    }
+  }
+
+}
+/* Gestion du sidebar réduit */
+
+
+/* Responsive */
