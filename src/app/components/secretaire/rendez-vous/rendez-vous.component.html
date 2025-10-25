@@ -1,0 +1,46 @@
+<div class="rendezvous-container">
+  <h2>Les Rendez-vous</h2>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading">
+    <p>Chargement des rendez-vous...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error">
+    <p>{{ error }}</p>
+    <button (click)="loadRendezVous()" class="btn-retry">Réessayer</button>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !error && rendezVous.length === 0" class="empty-state">
+    <p>Aucun rendez-vous à venir</p>
+  </div>
+
+  <!-- Rendez-vous List -->
+  <div *ngIf="!loading && rendezVous.length > 0" class="rendezvous-list">
+    <div *ngFor="let rdv of rendezVous" class="rendezvous-card">
+      <div class="rendezvous-header">
+        <h3>Dr {{ rdv.medecin?.user?.nom }} {{ rdv.medecin?.user?.prenom }}</h3>
+        <span [class]="'statut-badge ' + getStatutClass(rdv.statut)">
+          {{ rdv.statut }}
+        </span>
+      </div>
+
+      <div class="rendezvous-details">
+        <div class="detail-item">
+          <strong>Date:</strong> {{ rdv.date_rendezvous | date:'dd/MM/yyyy' }}
+        </div>
+        <div class="detail-item">
+          <strong>Heure:</strong> {{ rdv.heure_rendezvous }}
+        </div>
+        <div *ngIf="rdv.motif" class="detail-item">
+          <strong>Motif:</strong> {{ rdv.motif }}
+        </div>
+        <div class="detail-item">
+          <strong>Patient:</strong> {{ rdv.patient?.user?.nom }} {{ rdv.patient?.user?.prenom }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

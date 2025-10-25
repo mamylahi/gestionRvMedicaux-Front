@@ -1,0 +1,133 @@
+<div class="min-h-screen bg-gray-50 ml-64 p-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">Mes Patients</h1>
+    <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
+            (click)="loadMesPatients()" [disabled]="loading">
+      <i class="fas fa-sync-alt"></i>
+      <span>{{ loading ? 'Chargement...' : 'Actualiser' }}</span>
+    </button>
+  </div>
+
+  <!-- Messages d'erreur -->
+  <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+    <p class="text-gray-600 mt-4">Chargement des patients...</p>
+  </div>
+
+  <!-- Aucune donnée -->
+  <div *ngIf="!loading && patients.length === 0" class="text-center py-12">
+    <div class="text-gray-400 text-6xl mb-4">
+      <i class="fas fa-users"></i>
+    </div>
+    <p class="text-gray-600 text-xl">Aucun patient trouvé</p>
+  </div>
+
+  <!-- Grille des patients -->
+  <div *ngIf="!loading && patients.length > 0" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+    <div *ngFor="let patient of patients" class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
+
+      <!-- En-tête avec avatar et statut -->
+      <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-4">
+            <!-- Avatar -->
+            <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-2xl font-bold">
+              {{ getInitials(patient.user?.prenom, patient.user?.nom) }}
+            </div>
+            <div>
+              <h3 class="text-xl font-bold">{{ patient.user?.prenom }} {{ patient.user?.nom }}</h3>
+              <p class="text-blue-100">{{ patient.numero_patient }}</p>
+            </div>
+          </div>
+          <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+            Actif
+          </span>
+        </div>
+      </div>
+
+      <!-- Informations du patient -->
+      <div class="p-6">
+        <!-- Informations de contact -->
+        <div class="space-y-4 mb-6">
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <i class="fas fa-envelope text-blue-600 text-sm"></i>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Email</p>
+              <p class="text-gray-800 font-medium">{{ patient.user?.email }}</p>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <i class="fas fa-phone text-blue-600 text-sm"></i>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Téléphone</p>
+              <p class="text-gray-800 font-medium">{{ patient.user?.telephone || 'Non renseigné' }}</p>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <i class="fas fa-map-marker-alt text-blue-600 text-sm"></i>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Adresse</p>
+              <p class="text-gray-800 font-medium">{{ patient.user?.adresse || 'Non renseignée' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="grid grid-cols-3 gap-4 mb-6 text-center">
+          <div>
+            <div class="text-2xl font-bold text-blue-600">0</div>
+            <div class="text-xs text-gray-500">Rendez-vous</div>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-green-600">0</div>
+            <div class="text-xs text-gray-500">Consultations</div>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-purple-600">0</div>
+            <div class="text-xs text-gray-500">Documents</div>
+          </div>
+        </div>
+
+        <!-- Date d'inscription -->
+        <div class="border-t border-gray-200 pt-4">
+          <p class="text-sm text-gray-500">Inscrit le</p>
+          <p class="text-gray-800 font-medium">{{ patient.created_at | date:'dd/MM/yyyy' }}</p>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+        <div class="flex space-x-2">
+          <button class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors"
+                  (click)="voirDossierMedical(patient.id)">
+            <i class="fas fa-folder-medical"></i>
+            <span>Dossier</span>
+          </button>
+          <button class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors"
+                  (click)="prendreRendezVous(patient.id)">
+            <i class="fas fa-calendar-plus"></i>
+            <span>RDV</span>
+          </button>
+          <button class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors">
+            <i class="fas fa-envelope"></i>
+            <span>Contacter</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

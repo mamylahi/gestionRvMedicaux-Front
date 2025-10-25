@@ -46,4 +46,9 @@ export class RendezVousService {
   updateStatut(id: string, statut: string) {
     return this.http.patch<RendezVous>(`${this.URL}/${id}/statut`, { statut });
   }
+
+  // AJOUT: Méthode pour récupérer les RendezVous du patient connecté
+  getMesRendezVous() {
+    return this.http.get<any[]>(`${environment.apiUrl}/mes-rendezvous`);
+  }
 }

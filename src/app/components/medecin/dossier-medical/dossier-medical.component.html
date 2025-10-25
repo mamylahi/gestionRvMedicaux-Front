@@ -1,0 +1,78 @@
+<div class="min-h-screen bg-gray-50 ml-64 p-6">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">Dossiers Médicaux</h1>
+    <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
+            (click)="loadDossiersMedicaux()" [disabled]="loading">
+      <i class="fas fa-sync-alt"></i>
+      <span>{{ loading ? 'Chargement...' : 'Actualiser' }}</span>
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="loading" class="text-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+    <p class="text-gray-600 mt-4">Chargement des dossiers médicaux...</p>
+  </div>
+
+  <div *ngIf="!loading && dossiersMedicaux.length === 0" class="text-center py-12">
+    <div class="text-gray-400 text-6xl mb-4">
+      <i class="fas fa-folder-medical"></i>
+    </div>
+    <p class="text-gray-600 text-xl">Aucun dossier médical trouvé</p>
+  </div>
+
+  <div *ngIf="!loading && dossiersMedicaux.length > 0" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+    <div *ngFor="let dossier of dossiersMedicaux" class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+      <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white">
+        <div class="flex justify-between items-center">
+          <div>
+            <h3 class="text-xl font-bold">Dossier Médical</h3>
+            <p class="opacity-90">{{ dossier.patient?.user?.prenom }} {{ dossier.patient?.user?.nom }}</p>
+          </div>
+          <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm font-medium">
+            #{{ dossier.patient?.numero_patient }}
+          </span>
+        </div>
+      </div>
+
+      <div class="p-6">
+        <div class="space-y-4 mb-6">
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+              <i class="fas fa-tint text-green-600"></i>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Groupe sanguin</p>
+              <p class="text-gray-800 font-medium">{{ getGroupeSanguinText(dossier.groupe_sanguin!) }}</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+              <i class="fas fa-calendar text-green-600"></i>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Date création</p>
+              <p class="text-gray-800 font-medium">{{ dossier.date_creation | date:'dd/MM/yyyy' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex space-x-3">
+          <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                  (click)="ouvrirDossier(dossier.id)">
+            <i class="fas fa-folder-open"></i>
+            <span>Ouvrir</span>
+          </button>
+          <button class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                  (click)="modifierDossier(dossier.id)">
+            <i class="fas fa-edit"></i>
+            <span>Modifier</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

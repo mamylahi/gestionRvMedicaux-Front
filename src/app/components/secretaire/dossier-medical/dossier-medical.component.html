@@ -1,0 +1,60 @@
+<div class="dossiers-container">
+  <h2>Dossiers Médicaux</h2>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading">
+    <p>Chargement des dossiers médicaux...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error">
+    <p>{{ error }}</p>
+    <button (click)="loadDossiers()" class="btn-retry">Réessayer</button>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !error && dossiers.length === 0" class="empty-state">
+    <p>Aucun dossier médical trouvé</p>
+  </div>
+
+  <!-- Dossiers List -->
+  <div *ngIf="!loading && dossiers.length > 0" class="dossiers-list">
+    <div *ngFor="let dossier of dossiers" class="dossier-card">
+      <div class="dossier-header">
+        <h3>{{ dossier.patient?.user?.nom }} {{ dossier.patient?.user?.prenom }}</h3>
+      </div>
+
+      <div class="dossier-details">
+        <div class="detail-item">
+          <strong>Date de création:</strong>
+          {{ dossier.date_creation | date:'dd/MM/yyyy' }}
+        </div>
+
+        <div *ngIf="dossier.groupe_sanguin" class="detail-item">
+          <strong>Groupe sanguin:</strong>
+          <span class="groupe-sanguin">
+            {{ getGroupeSanguinIcon(dossier.groupe_sanguin) }}
+            {{ dossier.groupe_sanguin.replace('_', ' ') }}
+          </span>
+        </div>
+
+        <div *ngIf="dossier.patient" class="patient-info">
+          <div class="detail-item">
+            <strong>Email:</strong> {{ dossier.patient.user?.email || 'Non renseigné' }}
+          </div>
+          <div class="detail-item">
+            <strong>Téléphone:</strong> {{ dossier.patient.user?.telephone || 'Non renseigné' }}
+          </div>
+        </div>
+      </div>
+
+      <div class="dossier-actions">
+        <button
+          (click)="ouvrirDossier(dossier)"
+          class="btn-ouvrir">
+          📁 Ouvrir le dossier
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -42,4 +42,11 @@ export class ConsultationService {
   getByPatient(patientId: string) {
     return this.http.get<Consultation[]>(`${this.URL}/patient/${patientId}/all`);
   }
+
+
+  // Méthode pour récupérer les consultations du patient connecté
+  getMesConsultations() {
+    return this.http.get<Consultation[]>(`${this.URL}/mes-consultations`);
+  }
+
 }

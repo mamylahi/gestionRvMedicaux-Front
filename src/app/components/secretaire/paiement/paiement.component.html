@@ -1,0 +1,61 @@
+<div class="paiements-container">
+  <h2>Paiements en Attente</h2>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading">
+    <p>Chargement des paiements...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error">
+    <p>{{ error }}</p>
+    <button (click)="loadPaiements()" class="btn-retry">Réessayer</button>
+  </div>
+
+  <!-- Summary -->
+  <div *ngIf="!loading && paiements.length > 0" class="summary">
+    <p><strong>Total à régler:</strong> {{ getTotalMontant() }} €</p>
+    <p><strong>Nombre de paiements:</strong> {{ paiements.length }}</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !error && paiements.length === 0" class="empty-state">
+    <p>Aucun paiement en attente</p>
+  </div>
+
+  <!-- Paiements List -->
+  <div *ngIf="!loading && paiements.length > 0" class="paiements-list">
+    <div *ngFor="let paiement of paiements" class="paiement-card">
+      <div class="paiement-header">
+        <h3>Consultation #{{ paiement.consultation_id }}</h3>
+        <span class="montant">{{ paiement.montant }} €</span>
+      </div>
+
+      <div class="paiement-details">
+        <div class="detail-item">
+          <strong>Date:</strong> {{ paiement.date_paiement | date:'dd/MM/yyyy' }}
+        </div>
+        <div class="detail-item">
+          <strong>Moyen de paiement:</strong>
+          <span class="moyen-paiement">
+            {{ getMoyenPaiementIcon(paiement.moyen_paiement) }}
+            {{ paiement.moyen_paiement }}
+          </span>
+        </div>
+        <div class="detail-item">
+          <strong>Statut:</strong>
+          <span class="statut statut-impaye">{{ paiement.statut }}</span>
+        </div>
+      </div>
+
+      <div class="paiement-actions">
+        <button
+          (click)="payerPaiement(paiement)"
+          class="btn-payer"
+          [disabled]="paiement.statut === 'valide'">
+          Payer maintenant
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

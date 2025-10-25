@@ -1,0 +1,87 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <!-- En-tête -->
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold text-gray-800">Mes Rendez-vous</h1>
+    </div>
+
+    <!-- Barre de recherche -->
+    <div class="mb-6 flex gap-4">
+      <div class="flex-1">
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (input)="onSearch()"
+          placeholder="Rechercher par médecin, motif ou statut..."
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+      </div>
+      <button
+        (click)="onResetFilters()"
+        class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+      >
+        Réinitialiser
+      </button>
+    </div>
+
+    <!-- Message d'erreur -->
+    <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Chargement -->
+    <div *ngIf="isLoading" class="text-center py-8">
+      <p class="text-gray-600">Chargement en cours...</p>
+    </div>
+
+    <!-- Liste des rendez-vous -->
+    <div *ngIf="!isLoading && filteredRendezVous.length > 0" class="overflow-x-auto">
+      <table class="min-w-full bg-white border border-gray-200">
+        <thead class="bg-gray-100">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Date</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Heure</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Médecin</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Motif</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Statut</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
+        </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+        <tr *ngFor="let rdv of filteredRendezVous" class="hover:bg-gray-50">
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            {{ rdv.date_rendezvous | date: 'dd/MM/yyyy' }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            {{ rdv.heure_rendezvous }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            Dr. {{ rdv.medecin?.user?.prenom }} {{ rdv.medecin?.user?.nom }}
+          </td>
+          <td class="px-6 py-4 text-sm text-gray-900">
+            {{ rdv.motif || 'Non spécifié' }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+              <span [ngClass]="getStatutClass(rdv.statut)" class="px-2 py-1 text-xs font-semibold rounded-full">
+                {{ formatStatut(rdv.statut) }}
+              </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">
+            <button
+              (click)="onView(rdv.id)"
+              class="text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Détails
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Message aucun résultat -->
+    <div *ngIf="!isLoading && filteredRendezVous.length === 0" class="text-center py-8">
+      <p class="text-gray-600">Aucun rendez-vous trouvé.</p>
+    </div>
+  </div>
+</div>

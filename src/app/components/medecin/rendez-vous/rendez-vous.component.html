@@ -1,0 +1,117 @@
+<div class="min-h-screen bg-gray-50 ml-64 p-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">Mes Rendez-vous</h1>
+    <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
+            (click)="loadMesRendezVous()" [disabled]="loading">
+      <i class="fas fa-sync-alt"></i>
+      <span>{{ loading ? 'Chargement...' : 'Actualiser' }}</span>
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="loading" class="text-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+    <p class="text-gray-600 mt-4">Chargement des rendez-vous...</p>
+  </div>
+
+  <div *ngIf="!loading && rendezVous.length === 0" class="text-center py-12">
+    <div class="text-gray-400 text-6xl mb-4">
+      <i class="fas fa-calendar-alt"></i>
+    </div>
+    <p class="text-gray-600 text-xl">Aucun rendez-vous trouvé</p>
+  </div>
+
+  <div *ngIf="!loading && rendezVous.length > 0" class="space-y-6">
+    <div *ngFor="let rdv of rendezVous" class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+      <!-- En-tête colorée selon le statut -->
+      <div [class]="'p-6 text-white ' +
+        (rdv.statut === RendezVousStatut.CONFIRME ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
+         rdv.statut === RendezVousStatut.EN_ATTENTE ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
+         rdv.statut === RendezVousStatut.ANNULE ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
+         'bg-blue-500')">
+        <div class="flex justify-between items-center">
+          <div>
+            <h3 class="text-xl font-bold">Rendez-vous #{{ rdv.id }}</h3>
+            <p class="opacity-90">{{ rdv.patient?.user?.prenom }} {{ rdv.patient?.user?.nom }}</p>
+          </div>
+          <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm font-medium">
+            {{ getStatutText(rdv.statut) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div class="space-y-3">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-calendar text-blue-600"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Date</p>
+                <p class="text-gray-800 font-medium">{{ rdv.date_rendezvous | date:'dd/MM/yyyy' }}</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-clock text-blue-600"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Heure</p>
+                <p class="text-gray-800 font-medium">{{ rdv.heure_rendezvous }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-user text-blue-600"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Patient</p>
+                <p class="text-gray-800 font-medium">{{ rdv.patient?.user?.prenom }} {{ rdv.patient?.user?.nom }}</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-phone text-blue-600"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Téléphone</p>
+                <p class="text-gray-800 font-medium">{{ rdv.patient?.user?.telephone || 'Non renseigné' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <p class="text-sm text-gray-500 mb-2">Motif</p>
+          <p class="text-gray-800 bg-gray-50 p-3 rounded-lg">{{ rdv.motif || 'Non spécifié' }}</p>
+        </div>
+
+        <div class="flex space-x-3">
+          <button *ngIf="rdv.statut === RendezVousStatut.EN_ATTENTE"
+                  class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                  (click)="confirmerRendezVous(rdv.id)">
+            <i class="fas fa-check"></i>
+            <span>Confirmer</span>
+          </button>
+          <button *ngIf="rdv.statut !== RendezVousStatut.ANNULE"
+                  class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                  (click)="annulerRendezVous(rdv.id)">
+            <i class="fas fa-times"></i>
+            <span>Annuler</span>
+          </button>
+          <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+            <i class="fas fa-eye"></i>
+            <span>Détails</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

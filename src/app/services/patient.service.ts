@@ -2,6 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {environment} from '../environments/environment';
 import { Patient } from '../models/patient.model';
+import {Paiement} from '../models/paiement.model';
+import {Consultation} from '../models/consultation.model';
+import {DossierMedical} from '../models/dossiermedical.model';
+import {map} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -37,16 +41,23 @@ export class PatientService {
     return this.http.get<any>(`${this.URL}/${patientId}/dashboard`);
   }
 
+
   getMesRendezVous() {
-    return this.http.get<any>(`${this.URL}/mes-rendezvous`);
+    return this.http.get<any>(`${this.URL}/mes-rendezvous`).pipe(
+      map((response: any) => response.data?.rendezvous || [])
+    );
   }
 
   getMesPaiements() {
-    return this.http.get<any>(`${this.URL}/mes-paiements`);
+    return this.http.get<any>(`${this.URL}/mes-paiements`).pipe(
+      map((response: any) => response.data?.paiements || [])
+    );
   }
 
   getMesConsultations() {
-    return this.http.get<any>(`${this.URL}/mes-consultations`);
+    return this.http.get<any>(`${this.URL}/mes-consultations`).pipe(
+      map((response: any) => response.data?.consultations || [])
+    );
   }
 
   getMonDossierMedical() {

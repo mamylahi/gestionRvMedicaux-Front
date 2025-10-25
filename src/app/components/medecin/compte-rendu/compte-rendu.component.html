@@ -1,0 +1,77 @@
+<div class="min-h-screen bg-gray-50 ml-64 p-6">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">Comptes Rendus</h1>
+    <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
+            (click)="loadCompteRenduPatients()" [disabled]="loading">
+      <i class="fas fa-sync-alt"></i>
+      <span>{{ loading ? 'Chargement...' : 'Actualiser' }}</span>
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="loading" class="text-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+    <p class="text-gray-600 mt-4">Chargement des comptes rendus...</p>
+  </div>
+
+  <div *ngIf="!loading && comptesRendus.length === 0" class="text-center py-12">
+    <div class="text-gray-400 text-6xl mb-4">
+      <i class="fas fa-file-medical-alt"></i>
+    </div>
+    <p class="text-gray-600 text-xl">Aucun compte rendu trouvé</p>
+  </div>
+
+  <div *ngIf="!loading && comptesRendus.length > 0" class="space-y-6">
+    <div *ngFor="let cr of comptesRendus" class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+      <div class="bg-gradient-to-r from-purple-500 to-purple-600 p-6 text-white">
+        <div class="flex justify-between items-center">
+          <div>
+            <h3 class="text-xl font-bold">Compte Rendu #{{ cr.id }}</h3>
+            <p class="opacity-90">{{ cr.consultation?.rendezvous?.patient?.user?.prenom }} {{ cr.consultation?.rendezvous?.patient?.user?.nom }}</p>
+          </div>
+          <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm font-medium">
+            {{ cr.date_creation | date:'dd/MM/yyyy' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="p-6">
+        <div class="space-y-4 mb-6">
+          <div>
+            <p class="text-sm text-gray-500 mb-2">Diagnostic</p>
+            <p class="text-gray-800 bg-gray-50 p-3 rounded-lg">{{ cr.diagnostic || 'Non renseigné' }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 mb-2">Traitement</p>
+            <p class="text-gray-800 bg-gray-50 p-3 rounded-lg">{{ cr.traitement || 'Non renseigné' }}</p>
+          </div>
+          <div *ngIf="cr.observation">
+            <p class="text-sm text-gray-500 mb-2">Observations</p>
+            <p class="text-gray-800 bg-gray-50 p-3 rounded-lg">{{ cr.observation }}</p>
+          </div>
+        </div>
+
+        <div class="flex space-x-3">
+          <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                  (click)="voirCompteRendu(cr.id)">
+            <i class="fas fa-eye"></i>
+            <span>Voir</span>
+          </button>
+          <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                  (click)="telechargerCompteRendu(cr.id)">
+            <i class="fas fa-download"></i>
+            <span>Télécharger</span>
+          </button>
+          <button class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                  (click)="modifierCompteRendu(cr.id)">
+            <i class="fas fa-edit"></i>
+            <span>Modifier</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

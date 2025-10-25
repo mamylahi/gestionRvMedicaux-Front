@@ -1,0 +1,58 @@
+<div class="container mt-4">
+  <h2 class="text-center mb-4">Ajouter un paiement</h2>
+
+  <form (ngSubmit)="save()" #paiementForm="ngForm">
+    <div class="mb-3">
+      <label for="montant" class="form-label">Montant</label>
+      <input
+        type="number"
+        id="montant"
+        class="form-control"
+        name="montant"
+        required
+        [(ngModel)]="paiement.montant"
+      />
+    </div>
+
+    <div class="mb-3">
+      <label for="date_paiement" class="form-label">Date de paiement</label>
+      <input
+        type="date"
+        id="date_paiement"
+        class="form-control"
+        name="date_paiement"
+        required
+        [(ngModel)]="paiement.date_paiement"
+      />
+    </div>
+
+    <div class="mb-3">
+      <label for="statut" class="form-label">Statut</label>
+      <select
+        id="statut"
+        class="form-select"
+        name="statut"
+        [(ngModel)]="paiement.statut"
+        required
+      >
+        <option *ngFor="let s of statutEnum" [value]="s">{{ s }}</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="user_id" class="form-label">ID Utilisateur</label>
+      <input
+        type="number"
+        id="user_id"
+        class="form-control"
+        name="user_id"
+        required
+        [(ngModel)]="paiement.consultation_id"
+      />
+    </div>
+
+    <button class="btn btn-primary" type="submit" [disabled]="paiementForm.invalid">
+      Enregistrer
+    </button>
+  </form>
+</div>

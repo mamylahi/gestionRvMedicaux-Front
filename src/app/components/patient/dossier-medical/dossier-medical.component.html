@@ -1,0 +1,135 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <!-- En-tête -->
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold text-gray-800">Mon Dossier Médical</h1>
+      <button
+        *ngIf="dossierMedical"
+        (click)="onEdit()"
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+      >
+        Modifier
+      </button>
+    </div>
+
+    <!-- Message d'erreur -->
+    <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Chargement -->
+    <div *ngIf="isLoading" class="text-center py-8">
+      <p class="text-gray-600">Chargement en cours...</p>
+    </div>
+
+    <!-- Affichage du dossier médical -->
+    <div *ngIf="!isLoading && dossierMedical" class="space-y-6">
+      <!-- Informations générales -->
+      <div class="bg-gray-50 p-6 rounded-lg">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Informations Générales</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-1">Patient</label>
+            <p class="text-gray-900">
+              {{ dossierMedical.patient?.user?.prenom }} {{ dossierMedical.patient?.user?.nom }}
+            </p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-1">Groupe Sanguin</label>
+            <p class="text-gray-900 font-semibold">
+              {{ formatGroupeSanguin(dossierMedical.groupe_sanguin) }}
+            </p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-1">Date de Création</label>
+            <p class="text-gray-900">
+              {{ dossierMedical.date_creation | date: 'dd/MM/yyyy' }}
+            </p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-1">Dernière Mise à Jour</label>
+            <p class="text-gray-900">
+              {{ dossierMedical.updated_at | date: 'dd/MM/yyyy HH:mm' }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Informations du patient -->
+      <div class="bg-blue-50 p-6 rounded-lg" *ngIf="dossierMedical.patient">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Informations Patient</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-1">Nom Complet</label>
+            <p class="text-gray-900">
+              {{ dossierMedical.patient.user?.prenom }} {{ dossierMedical.patient.user?.nom }}
+            </p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-1">Téléphone</label>
+            <p class="text-gray-900">
+              {{ dossierMedical.patient.user?.telephone || 'Non renseigné' }}
+            </p>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-600 mb-1">Adresse</label>
+            <p class="text-gray-900">
+              {{ dossierMedical.patient.user?.adresse || 'Non renseignée' }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alertes médicales -->
+      <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-lg">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <svg class="w-6 h-6 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          Informations Importantes
+        </h2>
+        <div class="space-y-2">
+          <div class="flex items-start">
+            <span class="font-medium text-gray-700 mr-2">•</span>
+            <p class="text-gray-700">
+              Assurez-vous de communiquer votre groupe sanguin <strong>{{ formatGroupeSanguin(dossierMedical.groupe_sanguin) }}</strong> en cas d'urgence.
+            </p>
+          </div>
+          <div class="flex items-start">
+            <span class="font-medium text-gray-700 mr-2">•</span>
+            <p class="text-gray-700">
+              Informez toujours votre médecin de vos allergies et antécédents médicaux.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistiques rapides -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-green-50 p-4 rounded-lg text-center">
+          <p class="text-sm text-gray-600 mb-1">Consultations</p>
+          <p class="text-3xl font-bold text-green-600">-</p>
+          <p class="text-xs text-gray-500 mt-1">Voir toutes</p>
+        </div>
+        <div class="bg-purple-50 p-4 rounded-lg text-center">
+          <p class="text-sm text-gray-600 mb-1">Rendez-vous</p>
+          <p class="text-3xl font-bold text-purple-600">-</p>
+          <p class="text-xs text-gray-500 mt-1">Voir tous</p>
+        </div>
+        <div class="bg-orange-50 p-4 rounded-lg text-center">
+          <p class="text-sm text-gray-600 mb-1">Paiements</p>
+          <p class="text-3xl font-bold text-orange-600">-</p>
+          <p class="text-xs text-gray-500 mt-1">Voir tous</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message aucun dossier -->
+    <div *ngIf="!isLoading && !dossierMedical && !errorMessage" class="text-center py-8">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <p class="mt-4 text-gray-600">Aucun dossier médical trouvé.</p>
+    </div>
+  </div>
+</div>

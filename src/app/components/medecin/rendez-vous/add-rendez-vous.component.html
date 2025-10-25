@@ -1,0 +1,240 @@
+<div class="container-fluid p-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">
+            <i class="fas fa-calendar-plus me-2"></i>
+            Nouveau rendez-vous
+          </h4>
+        </div>
+
+        <div class="card-body">
+          <!-- Messages -->
+          <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle me-2"></i>{{ successMessage }}
+            <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+          </div>
+
+          <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle me-2"></i>{{ errorMessage }}
+            <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+          </div>
+
+          <!-- Loading -->
+          <div *ngIf="isLoading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Chargement...</span>
+            </div>
+          </div>
+
+          <!-- Formulaire -->
+          <form [formGroup]="rendezVousForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
+
+            <!-- Patient et Médecin -->
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-4">
+                  <label for="patient_id" class="form-label">
+                    <i class="fas fa-user-injured text-primary me-2"></i>
+                    Patient <span class="text-danger">*</span>
+                  </label>
+                  <select
+                    id="patient_id"
+                    class="form-select"
+                    formControlName="patient_id"
+                    [class.is-invalid]="isFieldInvalid('patient_id')">
+                    <option value="">-- Sélectionner un patient --</option>
+                    <option *ngFor="let patient of patients" [value]="patient.id">
+                      {{ getPatientLabel(patient) }}
+                    </option>
+                  </select>
+                  <div class="invalid-feedback" *ngIf="isFieldInvalid('patient_id')">
+                    Veuillez sélectionner un patient
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="mb-4">
+                  <label for="medecin_id" class="form-label">
+                    <i class="fas fa-user-md text-primary me-2"></i>
+                    Médecin <span class="text-danger">*</span>
+                  </label>
+                  <select
+                    id="medecin_id"
+                    class="form-select"
+                    formControlName="medecin_id"
+                    [class.is-invalid]="isFieldInvalid('medecin_id')">
+                    <option value="">-- Sélectionner un médecin --</option>
+                    <option *ngFor="let medecin of medecins" [value]="medecin.id">
+                      {{ getMedecinLabel(medecin) }}
+                    </option>
+                  </select>
+                  <div class="invalid-feedback" *ngIf="isFieldInvalid('medecin_id')">
+                    Veuillez sélectionner un médecin
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Date et Heure -->
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-4">
+                  <label for="date_rendezvous" class="form-label">
+                    <i class="fas fa-calendar text-primary me-2"></i>
+                    Date du rendez-vous <span class="text-danger">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    id="date_rendezvous"
+                    class="form-control"
+                    formControlName="date_rendezvous"
+                    [min]="getMinDate()"
+                    [class.is-invalid]="isFieldInvalid('date_rendezvous')">
+                  <div class="invalid-feedback" *ngIf="isFieldInvalid('date_rendezvous')">
+                    La date est obligatoire
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="mb-4">
+                  <label for="heure_rendezvous" class="form-label">
+                    <i class="fas fa-clock text-primary me-2"></i>
+                    Heure du rendez-vous <span class="text-danger">*</span>
+                  </label>
+                  <select
+                    id="heure_rendezvous"
+                    class="form-select"
+                    formControlName="heure_rendezvous"
+                    [class.is-invalid]="isFieldInvalid('heure_rendezvous')">
+                    <option value="">-- Sélectionner une heure --</option>
+                    <option *ngFor="let heure of heuresDisponibles" [value]="heure">
+                      {{ heure }}
+                    </option>
+                  </select>
+                  <div class="invalid-feedback" *ngIf="isFieldInvalid('heure_rendezvous')">
+                    L'heure est obligatoire
+                  </div>
+                  <small class="form-text text-muted">
+                    Horaires disponibles: 8h00 - 18h00
+                  </small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Motif -->
+            <div class="mb-4">
+              <label for="motif" class="form-label">
+                <i class="fas fa-notes-medical text-primary me-2"></i>
+                Motif de consultation <span class="text-danger">*</span>
+              </label>
+              <textarea
+                id="motif"
+                class="form-control"
+                formControlName="motif"
+                rows="4"
+                placeholder="Décrivez le motif de la consultation..."
+                [class.is-invalid]="isFieldInvalid('motif')"></textarea>
+              <div class="invalid-feedback" *ngIf="isFieldInvalid('motif')">
+                Le motif est obligatoire (minimum 10 caractères)
+              </div>
+              <small class="form-text text-muted">
+                {{ rendezVousForm.get('motif')?.value}} caractères (minimum 10)
+              </small>
+            </div>
+
+            <!-- Statut -->
+            <div class="mb-4">
+              <label for="statut" class="form-label">
+                <i class="fas fa-info-circle text-primary me-2"></i>
+                Statut <span class="text-danger">*</span>
+              </label>
+              <select
+                id="statut"
+                class="form-select"
+                formControlName="statut"
+                [class.is-invalid]="isFieldInvalid('statut')">
+                <option *ngFor="let statut of statuts" [value]="statut.value">
+                  {{ statut.label }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Résumé du rendez-vous -->
+            <div class="card bg-light mb-4" *ngIf="rendezVousForm.get('date_rendezvous')?.value && rendezVousForm.get('heure_rendezvous')?.value">
+              <div class="card-body">
+                <h6 class="card-title text-primary">
+                  <i class="fas fa-clipboard-check me-2"></i>Résumé du rendez-vous
+                </h6>
+                <div class="row">
+                  <div class="col-md-6">
+                    <p class="mb-2">
+                      <strong>Date:</strong>
+                      <span class="text-primary">
+                        {{ rendezVousForm.get('date_rendezvous')?.value | date:'dd/MM/yyyy' }}
+                      </span>
+                    </p>
+                    <p class="mb-0">
+                      <strong>Heure:</strong>
+                      <span class="text-primary">
+                        {{ rendezVousForm.get('heure_rendezvous')?.value }}
+                      </span>
+                    </p>
+                  </div>
+                  <div class="col-md-6">
+                    <p class="mb-2">
+                      <strong>Patient:</strong>
+                      <span *ngIf="rendezVousForm.get('patient_id')?.value">
+                      </span>
+                    </p>
+                    <p class="mb-0">
+                      <strong>Médecin:</strong>
+                      <span *ngIf="rendezVousForm.get('medecin_id')?.value">
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Boutons d'action -->
+            <div class="d-flex justify-content-between">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="onCancel()"
+                [disabled]="isLoading">
+                <i class="fas fa-times me-2"></i>Annuler
+              </button>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="rendezVousForm.invalid || isLoading">
+                <i class="fas fa-save me-2"></i>
+                Créer le rendez-vous
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Aide -->
+      <div class="card mt-3 border-primary">
+        <div class="card-body">
+          <h6 class="text-primary">
+            <i class="fas fa-info-circle me-2"></i>Informations
+          </h6>
+          <ul class="mb-0 small">
+            <li>Les champs marqués d'un <span class="text-danger">*</span> sont obligatoires</li>
+            <li>La date du rendez-vous ne peut pas être dans le passé</li>
+            <li>Les horaires disponibles sont de 8h00 à 18h00 par créneaux de 30 minutes</li>
+            <li>Le motif doit contenir au minimum 10 caractères</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

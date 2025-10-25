@@ -1,0 +1,91 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <!-- En-tête -->
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold text-gray-800">Mes Paiements</h1>
+      <div class="text-right">
+        <p class="text-sm text-gray-600">Total payé</p>
+        <p class="text-2xl font-bold text-green-600">{{ totalMontant | number:'1.2-2' }} FCFA</p>
+      </div>
+    </div>
+
+    <!-- Barre de recherche -->
+    <div class="mb-6 flex gap-4">
+      <div class="flex-1">
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (input)="onSearch()"
+          placeholder="Rechercher par moyen de paiement, statut ou montant..."
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+      </div>
+      <button
+        (click)="onResetFilters()"
+        class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+      >
+        Réinitialiser
+      </button>
+    </div>
+
+    <!-- Message d'erreur -->
+    <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Chargement -->
+    <div *ngIf="isLoading" class="text-center py-8">
+      <p class="text-gray-600">Chargement en cours...</p>
+    </div>
+
+    <!-- Liste des paiements -->
+    <div *ngIf="!isLoading && filteredPaiements.length > 0" class="overflow-x-auto">
+      <table class="min-w-full bg-white border border-gray-200">
+        <thead class="bg-gray-100">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Date</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Montant</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Moyen</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Statut</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Consultation</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
+        </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+        <tr *ngFor="let paiement of filteredPaiements" class="hover:bg-gray-50">
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            {{ paiement.date_paiement | date: 'dd/MM/yyyy' }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+            {{ paiement.montant | number:'1.2-2' }} FCFA
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            {{ formatMoyenPaiement(paiement.moyen_paiement) }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+              <span [ngClass]="getStatutClass(paiement.statut)" class="px-2 py-1 text-xs font-semibold rounded-full">
+                {{ formatStatut(paiement.statut) }}
+              </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            #{{ paiement.consultation_id }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">
+            <button
+              (click)="onView(paiement.id)"
+              class="text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Détails
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Message aucun résultat -->
+    <div *ngIf="!isLoading && filteredPaiements.length === 0" class="text-center py-8">
+      <p class="text-gray-600">Aucun paiement trouvé.</p>
+    </div>
+  </div>
+</div>

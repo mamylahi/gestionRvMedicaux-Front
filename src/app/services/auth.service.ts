@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {environment} from '../environments/environment';
+import {User} from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
@@ -49,4 +50,29 @@ export class AuthService {
   getToken(): string | null {
     return localStorage.getItem('access_token');
   }
+
+  // AJOUT: Méthode pour récupérer l'utilisateur depuis le localStorage
+  getCurrentUser(): User | null {
+    try {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        return JSON.parse(userData);
+      }
+      return null;
+    } catch (error) {
+      console.error('Erreur lors de la récupération de l\'utilisateur:', error);
+      return null;
+    }
+  }
+
+  // AJOUT: Méthode pour sauvegarder l'utilisateur dans le localStorage
+  setCurrentUser(user: any): void {
+    localStorage.setItem('user', JSON.stringify(user));
+  }
+
+  // AJOUT: Méthode pour effacer l'utilisateur du localStorage
+  clearCurrentUser(): void {
+    localStorage.removeItem('user');
+  }
+
 }

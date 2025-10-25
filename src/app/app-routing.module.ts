@@ -6,31 +6,43 @@ import { RouterModule, Routes } from '@angular/router';
 // import { DashboardComponent } from './components/dashboard/dashboard.component';
 //
 // // Administration
- import { DepartementComponent } from './components/departement/departement.component';
- import { SpecialiteComponent } from './components/specialite/specialite.component';
+ import { DepartementComponent } from './components/admin/departement/departement.component';
+ import { SpecialiteComponent } from './components/admin/specialite/specialite.component';
 
 // // Personnel Médical
- import { MedecinComponent } from './components/medecin/medecin.component';
- import { SecretaireComponent } from './components/secretaire/secretaire.component';
- import { PatientComponent } from './components/patient/patient.component';
+ import { MedecinComponent } from './components/admin/medecin/medecin.component';
+ import { SecretaireComponent } from './components/admin/secretaire/secretaire.component';
+ import { PatientComponent } from './components/admin/patient/patient.component';
 
 
-import { RendezVousComponent } from './components/rendez-vous/rendez-vous.component';
- import { ConsultationComponent } from './components/consultation/consultation.component';
- import { AddConsultationComponent } from './components/consultation/add-consultation.component';
- import { CompteRenduComponent } from './components/compte-rendu/compte-rendu.component';
- import { DisponibiliteComponent } from './components/disponibilite/disponibilite.component';
- import { DossierMedicalComponent } from './components/dossier-medical/dossier-medical.component';import { PaiementComponent } from './components/paiement/paiement.component';
- import {AddDepartementComponent} from './components/departement/add-departement.component';
- import {AddSpecialiteComponent} from './components/specialite/add-specialite.component';
- import {AddMedecinComponent} from './components/medecin/add-medecin.component';
- import {AddRendezVousComponent} from './components/rendez-vous/add-rendez-vous.component';
- import {AddCompteRenduComponent} from './components/compte-rendu/add-compte-rendu.component';
- import {AddDisponibiliteComponent} from './components/disponibilite/add-disponibilite.component';
- import {AddDossierMedicalComponent} from './components/dossier-medical/add-dossier-medical.component';
- import {AddPaiementComponent} from './components/paiement/add-paiement.component';
+import { RendezVousComponent } from './components/admin/rendez-vous/rendez-vous.component';
+ import { ConsultationComponent } from './components/admin/consultation/consultation.component';
+ import { AddConsultationComponent } from './components/admin/consultation/add-consultation.component';
+ import { CompteRenduComponent } from './components/admin/compte-rendu/compte-rendu.component';
+ import { DisponibiliteComponent } from './components/admin/disponibilite/disponibilite.component';
+ import { DossierMedicalComponent } from './components/admin/dossier-medical/dossier-medical.component';import { PaiementComponent } from './components/admin/paiement/paiement.component';
+ import {AddDepartementComponent} from './components/admin/departement/add-departement.component';
+ import {AddSpecialiteComponent} from './components/admin/specialite/add-specialite.component';
+ import {AddMedecinComponent} from './components/admin/medecin/add-medecin.component';
+ import {AddRendezVousComponent} from './components/admin/rendez-vous/add-rendez-vous.component';
+ import {AddCompteRenduComponent} from './components/admin/compte-rendu/add-compte-rendu.component';
+ import {AddDisponibiliteComponent} from './components/admin/disponibilite/add-disponibilite.component';
+ import {AddDossierMedicalComponent} from './components/admin/dossier-medical/add-dossier-medical.component';
+ import {AddPaiementComponent} from './components/admin/paiement/add-paiement.component';
 import {DashboardComponent} from './components/dashboard/dashboard.component';
-import {UserComponent} from './components/users/user.component';
+import {UserComponent} from './components/admin/users/user.component';
+import {MedecinCompteRenduComponent} from './components/medecin/compte-rendu/compte-rendu.component';
+import {MedecinConsultationComponent} from './components/medecin/consultation/consultation.component';
+import {MedecinDossierMedicalComponent} from './components/medecin/dossier-medical/dossier-medical.component';
+import {MedecinRendezVousComponent} from './components/medecin/rendez-vous/rendez-vous.component';
+import {MedecinPatientComponent} from './components/medecin/patient/patient.component';
+import {PatientConsultationComponent} from './components/patient/consultation/consultation.component';
+import {PatientDossierMedicalComponent} from './components/patient/dossier-medical/dossier-medical.component';
+import {PatientPaiementsComponent} from './components/patient/paiement/paiement.component';
+import {PatientRendezVousComponent} from './components/patient/rendez-vous/rendez-vous.component';
+import {SecretaireDossierMedicalComponent} from './components/secretaire/dossier-medical/dossier-medical.component';
+import {SecretairePaiementComponent} from './components/secretaire/paiement/paiement.component';
+import {SecretaireRendezVousComponent} from './components/secretaire/rendez-vous/rendez-vous.component';
 
 const routes: Routes = [
   // Public routes
@@ -62,6 +74,25 @@ const routes: Routes = [
 
   { path: 'patients', component: PatientComponent },
   { path: 'patients/edit/:id', component: PatientComponent },
+
+  // Nouvelles routes pour les données du patient connecté
+  { path: 'mes-pat-rendezvous', component: PatientRendezVousComponent },
+  { path: 'mes-pat-paiements', component: PatientPaiementsComponent },
+  { path: 'mes-pat-consultations', component: PatientConsultationComponent },
+  { path: 'mon-pat-dossier-medical', component: PatientDossierMedicalComponent },
+
+  // Nouvelles routes pour les données du medecin connecté
+  { path: 'mes-rv', component: MedecinRendezVousComponent },
+  { path: 'mes-med-patients', component: MedecinPatientComponent },
+  { path: 'mes-med-consultations', component: MedecinConsultationComponent },
+  { path: 'dossier-med-medicaux', component: MedecinDossierMedicalComponent },
+  { path: 'compte-med-rendus', component: MedecinCompteRenduComponent },
+
+  // Nouvelles routes pour les données du secretaire connecté
+  { path: 'mes-sec-rendezvous', component: SecretaireRendezVousComponent },
+  { path: 'sec-paiements', component: SecretairePaiementComponent },
+  { path: 'sec-dossier-medicaux', component: SecretaireDossierMedicalComponent },
+
 
   // Gestion des Consultations
   { path: 'rendez-vous', component: RendezVousComponent },

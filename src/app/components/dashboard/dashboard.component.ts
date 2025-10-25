@@ -262,32 +262,25 @@ export class DashboardComponent implements OnInit {
   loadPatientDashboard(patientId: string) {
     console.log('Loading patient dashboard for ID:', patientId);
 
+    // Utilisez le service PatientService au lieu des services individuels
     forkJoin({
-      rendezVous: this.rendezVousService.getByPatient(patientId).pipe(catchError(() => of([] as any))),
-      consultations: this.consultationService.getByPatient(patientId).pipe(catchError(() => of([] as any))),
-      paiements: this.paiementService.getByPatient(patientId).pipe(catchError(() => of([] as any)))
+      dashboard: this.patientService.getDashboard(patientId).pipe(catchError(() => of({ data: { statistiques: {}, prochain_rendez_vous: null } }))),
+      rendezVous: this.patientService.getMesRendezVous().pipe(catchError(() => of([]))),
+      consultations: this.patientService.getMesConsultations().pipe(catchError(() => of([]))),
+      paiements: this.patientService.getMesPaiements().pipe(catchError(() => of([])))
     }).subscribe({
       next: (data: any) => {
         console.log('Patient dashboard data:', data);
 
-        const rendezVousData: any = data.rendezVous || [];
-        const consultationsData: any = data.consultations || [];
-        const paiementsData: any = data.paiements || [];
-
-        const rendezVousArray = Array.isArray(rendezVousData) ? rendezVousData : (rendezVousData.data || []);
-        const consultationsArray = Array.isArray(consultationsData) ? consultationsData : (consultationsData.data || []);
-        const paiementsArray = Array.isArray(paiementsData) ? paiementsData : (paiementsData.data || []);
-
-        const prochainRdv = rendezVousArray
-          .filter((rv: any) => new Date(rv.date_rendezvous || rv.date) >= new Date())
-          .sort((a: any, b: any) => new Date(a.date_rendezvous || a.date).getTime() - new Date(b.date_rendezvous || b.date).getTime())[0];
+        const dashboardData = data.dashboard?.data || {};
+        const statistiques = dashboardData.statistiques || {};
 
         this.dashboardData = {
-          mesRendezVous: rendezVousArray.length,
-          mesConsultations: consultationsArray.length,
-          ordonnances: consultationsArray.filter((c: any) => c.ordonnance).length,
-          mesPaiements: paiementsArray.length,
-          prochainRendezVous: prochainRdv || null
+          mesRendezVous: statistiques.mes_rendez_vous || data.rendezVous.length || 0,
+          mesConsultations: statistiques.mes_consultations || data.consultations.length || 0,
+          ordonnances: statistiques.ordonnances || 0,
+          mesPaiements: statistiques.mes_paiements || data.paiements.length || 0,
+          prochainRendezVous: dashboardData.prochain_rendez_vous || null
         };
 
         console.log('Patient dashboard data processed:', this.dashboardData);
