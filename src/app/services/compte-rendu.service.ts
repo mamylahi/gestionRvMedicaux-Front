@@ -43,7 +43,7 @@ export class CompteRenduService {
   /**
    * Supprimer un compte rendu
    */
-  delete(id: string): Observable<any> {
+  delete(id: number): Observable<any> {
     return this.http.delete<any>(`${this.URL}/${id}`);
   }
 

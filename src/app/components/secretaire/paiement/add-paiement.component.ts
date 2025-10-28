@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { PaiementService } from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/services/paiement.service';
-import {Paiement} from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/models/paiement.model';
-import {StatutPaiement} from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/models/enum';
 import {FormsModule} from '@angular/forms';
+import {Paiement} from '../../../models/paiement.model';
+import {StatutPaiement} from '../../../models/enum';
+import {PaiementService} from '../../../services/paiement.service';
 
 
 @Component({

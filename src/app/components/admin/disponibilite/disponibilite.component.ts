@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import {MedecinService} from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/services/medecin.service';
-import {DisponibiliteService} from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/services/disponibilite.service';
-import {Disponibilite} from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/models/disponibilite.model';
-import {Medecin} from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/models/medecin.model';
 import {FormsModule} from '@angular/forms';
 import {CommonModule, DatePipe} from '@angular/common';
+import {Disponibilite} from '../../../models/disponibilite.model';
+import {Medecin} from '../../../models/medecin.model';
+import {DisponibiliteService} from '../../../services/disponibilite.service';
+import {MedecinService} from '../../../services/medecin.service';
 
 
 @Component({

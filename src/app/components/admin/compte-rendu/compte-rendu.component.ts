@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { CompteRenduService } from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/services/compte-rendu.service';
-import { CompteRendu } from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/models/compterendu.model';
 import { Router } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { CommonModule} from '@angular/common';
+import {CompteRendu} from '../../../models/compterendu.model';
+import {CompteRenduService} from '../../../services/compte-rendu.service';
 
 
 @Component({

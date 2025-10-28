@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import { Router } from '@angular/router';
-import {Patient} from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/models/patient.model';
-import {Medecin} from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/models/medecin.model';
-import {RendezVousStatut} from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/models/enum';
-import {RendezVousService} from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/services/rendez-vous.service';
-import {PatientService} from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/services/patient.service';
-import {MedecinService} from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/services/medecin.service';
 import {CommonModule, DatePipe} from '@angular/common';
+import {Patient} from '../../../models/patient.model';
+import {Medecin} from '../../../models/medecin.model';
+import {RendezVousStatut} from '../../../models/enum';
+import {RendezVousService} from '../../../services/rendez-vous.service';
+import {PatientService} from '../../../services/patient.service';
+import {MedecinService} from '../../../services/medecin.service';
 
 
 @Component({

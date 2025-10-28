@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Medecin} from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/models/medecin.model';
-import {DisponibiliteService} from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/services/disponibilite.service';
-import {MedecinService} from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/services/medecin.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {CommonModule} from '@angular/common';
+import {Medecin} from '../../../models/medecin.model';
+import {DisponibiliteService} from '../../../services/disponibilite.service';
+import {MedecinService} from '../../../services/medecin.service';
 
 
 @Component({
