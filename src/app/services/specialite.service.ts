@@ -23,7 +23,7 @@ export class SpecialiteService {
     return this.http.post<Specialite>(this.URL, data);
   }
 
-  update(id: string, data: any) {
+  update(id: number, data: any) {
     return this.http.put<Specialite>(`${this.URL}/${id}`, data);
   }
 

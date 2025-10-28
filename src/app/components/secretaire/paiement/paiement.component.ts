@@ -1,69 +1,121 @@
 import { Component, OnInit } from '@angular/core';
-import { PaiementService } from '../../../services/paiement.service';
-import { AuthService } from '../../../services/auth.service'; //
-import { Paiement } from '../../../models/paiement.model';
-import { StatutPaiement } from '../../../models/enum';
-import { CurrencyPipe, DatePipe, CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; //  pour la recherche
-import { Router } from '@angular/router';
-import {SecretaireService} from '../../../services/secretaire.service'; //  pour la navigation
+import { CurrencyPipe, DatePipe, NgClass, NgFor } from '@angular/common';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import {Paiement} from '../../../models/paiement.model';
+import {StatutPaiement} from '../../../models/enum';
+import {PaiementService} from '../../../services/paiement.service';
 
 @Component({
   selector: 'app-paiement',
   templateUrl: './paiement.component.html',
   standalone: true,
   imports: [
-    CommonModule,
+    NgClass,
+    CurrencyPipe,
     DatePipe,
+    NgFor,
+    CommonModule,
     FormsModule
   ]
 })
-export class SecretairePaiementComponent implements OnInit {
+export class PaiementComponent implements OnInit {
   paiements: Paiement[] = [];
-  loading: boolean = false;
-  error: string = '';
+  statutEnum = StatutPaiement;
 
-  constructor(
-    private secretaireService: SecretaireService) {}
+  // Variables pour les modales
+  showModal = false;
+  modalTitle = '';
+  currentPaiement: Paiement = new Paiement();
+  isEditMode = false;
+
+  constructor(private paiementService: PaiementService) {}
 
   ngOnInit(): void {
     this.loadPaiements();
   }
 
   loadPaiements(): void {
-    this.loading = true;
-    this.error = '';
-
-    this.secretaireService.getPaiementsNonPayes().subscribe({
-      next: (data) => {
-        this.paiements = data;
-        this.loading = false;
+    this.paiementService.getAll().subscribe({
+      next: (data: any) => {
+        if (data && data.data) {
+          this.paiements = Array.isArray(data.data) ? data.data : [data.data];
+        } else if (Array.isArray(data)) {
+          this.paiements = data;
+        } else {
+          this.paiements = [];
+        }
+        console.log('Paiements chargés:', this.paiements);
       },
-      error: (error) => {
-        this.error = 'Erreur lors du chargement des paiements';
-        this.loading = false;
-        console.error('Erreur:', error);
+      error: (err) => {
+        console.error('Erreur de chargement des paiements', err);
+        this.paiements = [];
       }
     });
   }
 
-  getMoyenPaiementIcon(moyen: string): string {
-    switch (moyen) {
-      case 'CARTE': return '💳';
-      case 'ESPECES': return '💰';
-      case 'CHEQUE': return '📄';
-      case 'VIREMENT': return '🏦';
-      default: return '💵';
+  openAddModal(): void {
+    this.modalTitle = 'Ajouter un paiement';
+    this.currentPaiement = new Paiement();
+    this.isEditMode = false;
+    this.showModal = true;
+  }
+
+  openEditModal(paiement: Paiement): void {
+    this.modalTitle = 'Modifier le paiement';
+    this.currentPaiement = { ...paiement };
+    this.isEditMode = true;
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.currentPaiement = new Paiement();
+  }
+
+  savePaiement(): void {
+    if (this.isEditMode) {
+      // Modification
+      this.paiementService.update(this.currentPaiement.id, this.currentPaiement).subscribe({
+        next: () => {
+          this.loadPaiements();
+          this.closeModal();
+        },
+        error: (err) => console.error('Erreur de modification', err)
+      });
+    } else {
+      // Ajout
+      this.paiementService.create(this.currentPaiement).subscribe({
+        next: () => {
+          this.loadPaiements();
+          this.closeModal();
+        },
+        error: (err) => console.error('Erreur de création', err)
+      });
     }
   }
 
-  payerPaiement(paiement: Paiement): void {
-    // Implémentez la logique de paiement ici
-    console.log('Paiement à traiter:', paiement);
-    alert(`Paiement de ${paiement.montant}€ en cours de traitement...`);
+  deletePaiement(id: number): void {
+    if (confirm('Voulez-vous vraiment supprimer ce paiement ?')) {
+      this.paiementService.delete(id).subscribe({
+        next: () => this.loadPaiements(),
+        error: (err) => console.error('Erreur de suppression', err)
+      });
+    }
   }
 
-  getTotalMontant(): number {
-    return this.paiements.reduce((total, paiement) => total + paiement.montant, 0);
+  // Helper pour obtenir les valeurs de l'énumération
+  getStatutValues(): string[] {
+    return Object.values(this.statutEnum);
+  }
+
+  // Ajoutez ces méthodes dans la classe PaiementComponent
+
+  getValidatedCount(): number {
+    return this.paiements.filter(p => p.statut === this.statutEnum.VALIDE).length;
+  }
+
+  getPendingCount(): number {
+    return this.paiements.filter(p => p.statut === this.statutEnum.EN_ATTENTE).length;
   }
 }

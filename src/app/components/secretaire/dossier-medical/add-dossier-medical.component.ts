@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import {CommonModule, NgClass} from '@angular/common';
 import {Patient} from '../../../models/patient.model';
 import {DossierMedicalService} from '../../../services/dossier-medical.service';
 import {PatientService} from '../../../services/patient.service';
-import {CommonModule, NgClass} from '@angular/common';
 
 
 @Component({

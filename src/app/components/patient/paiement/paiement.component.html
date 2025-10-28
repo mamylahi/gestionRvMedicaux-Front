@@ -47,8 +47,6 @@
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Montant</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Moyen</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Statut</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Consultation</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
         </tr>
         </thead>
         <tbody class="divide-y divide-gray-200">
@@ -67,17 +65,7 @@
                 {{ formatStatut(paiement.statut) }}
               </span>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-            #{{ paiement.consultation_id }}
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm">
-            <button
-              (click)="onView(paiement.id)"
-              class="text-blue-600 hover:text-blue-800 font-medium"
-            >
-              Détails
-            </button>
-          </td>
+
         </tr>
         </tbody>
       </table>

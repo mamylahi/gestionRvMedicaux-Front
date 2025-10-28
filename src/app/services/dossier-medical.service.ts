@@ -34,4 +34,8 @@ export class DossierMedicalService {
   getByPatient(patientId: string) {
     return this.http.get<DossierMedical>(`${this.URL}/patient/${patientId}/single`);
   }
+
+  getByPatientId(patientId: number) {
+    return this.http.get<DossierMedical>(`${this.URL}/patient/${patientId}/single`);
+  }
 }

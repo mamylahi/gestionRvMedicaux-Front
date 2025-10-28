@@ -1,117 +1,252 @@
-<div class="min-h-screen bg-gray-50 ml-64 p-6">
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 ml-64 p-6">
   <!-- Header -->
-  <div class="flex justify-between items-center mb-8">
-    <h1 class="text-3xl font-bold text-gray-800">Mes Rendez-vous</h1>
-    <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
-            (click)="loadMesRendezVous()" [disabled]="loading">
-      <i class="fas fa-sync-alt"></i>
-      <span>{{ loading ? 'Chargement...' : 'Actualiser' }}</span>
-    </button>
-  </div>
-
-  <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-    {{ errorMessage }}
-  </div>
-
-  <div *ngIf="loading" class="text-center py-12">
-    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-    <p class="text-gray-600 mt-4">Chargement des rendez-vous...</p>
-  </div>
-
-  <div *ngIf="!loading && rendezVous.length === 0" class="text-center py-12">
-    <div class="text-gray-400 text-6xl mb-4">
-      <i class="fas fa-calendar-alt"></i>
+  <div class="mb-8">
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">Mes Rendez-vous</h1>
+        <p class="text-gray-600">Gérez vos rendez-vous et consultations</p>
+      </div>
+      <button class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl flex items-center space-x-2 transition-all shadow-lg hover:shadow-xl"
+              (click)="loadMesRendezVous()" [disabled]="loading">
+        <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+        <span>{{ loading ? 'Chargement...' : 'Actualiser' }}</span>
+      </button>
     </div>
-    <p class="text-gray-600 text-xl">Aucun rendez-vous trouvé</p>
   </div>
 
-  <div *ngIf="!loading && rendezVous.length > 0" class="space-y-6">
-    <div *ngFor="let rdv of rendezVous" class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-      <!-- En-tête colorée selon le statut -->
-      <div [class]="'p-6 text-white ' +
-        (rdv.statut === RendezVousStatut.CONFIRME ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
-         rdv.statut === RendezVousStatut.EN_ATTENTE ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
-         rdv.statut === RendezVousStatut.ANNULE ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
-         'bg-blue-500')">
-        <div class="flex justify-between items-center">
-          <div>
-            <h3 class="text-xl font-bold">Rendez-vous #{{ rdv.id }}</h3>
-            <p class="opacity-90">{{ rdv.patient?.user?.prenom }} {{ rdv.patient?.user?.nom }}</p>
+  <!-- Message de succès -->
+  <div *ngIf="successMessage" class="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-xl mb-6 flex items-center shadow-lg animate-fade-in">
+    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+      <i class="fas fa-check-circle text-xl"></i>
+    </div>
+    <span class="font-medium">{{ successMessage }}</span>
+  </div>
+
+  <!-- Message d'erreur -->
+  <div *ngIf="errorMessage" class="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-4 rounded-xl mb-6 flex items-center shadow-lg">
+    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+      <i class="fas fa-exclamation-circle text-xl"></i>
+    </div>
+    <span class="font-medium">{{ errorMessage }}</span>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-20">
+    <div class="relative inline-flex">
+      <div class="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+      <div class="absolute inset-0 flex items-center justify-center">
+        <i class="fas fa-calendar-alt text-blue-600"></i>
+      </div>
+    </div>
+    <p class="text-gray-600 mt-4 font-medium">Chargement des rendez-vous...</p>
+  </div>
+
+  <!-- Aucune donnée -->
+  <div *ngIf="!loading && rendezVous.length === 0" class="text-center py-20">
+    <div class="bg-white rounded-3xl shadow-xl p-12 max-w-md mx-auto">
+      <div class="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-6">
+        <i class="fas fa-calendar-alt text-4xl text-blue-600"></i>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-800 mb-3">Aucun rendez-vous</h3>
+      <p class="text-gray-600">Vous n'avez pas de rendez-vous planifié pour le moment.</p>
+    </div>
+  </div>
+
+  <!-- Liste des rendez-vous -->
+  <div *ngIf="!loading && rendezVous.length > 0" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+    <div *ngFor="let rdv of rendezVous"
+         class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group">
+
+      <!-- Badge de statut flottant -->
+      <div class="relative">
+        <div [class]="'absolute top-4 right-4 z-10 px-4 py-2 rounded-full text-sm font-bold shadow-lg ' +
+          (rdv.statut === RendezVousStatut.CONFIRME ? 'bg-green-500 text-white' :
+           rdv.statut === RendezVousStatut.EN_ATTENTE ? 'bg-yellow-400 text-gray-800' :
+           rdv.statut === RendezVousStatut.ANNULE ? 'bg-red-500 text-white' :
+           rdv.statut === RendezVousStatut.TERMINE ? 'bg-gray-500 text-white' :
+           'bg-blue-500 text-white')">
+          {{ getStatutText(rdv.statut) }}
+        </div>
+
+        <!-- Bande colorée supérieure -->
+        <div [class]="'h-2 ' +
+          (rdv.statut === RendezVousStatut.CONFIRME ? 'bg-gradient-to-r from-green-400 to-green-600' :
+           rdv.statut === RendezVousStatut.EN_ATTENTE ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' :
+           rdv.statut === RendezVousStatut.ANNULE ? 'bg-gradient-to-r from-red-400 to-red-600' :
+           rdv.statut === RendezVousStatut.TERMINE ? 'bg-gradient-to-r from-gray-400 to-gray-600' :
+           'bg-gradient-to-r from-blue-400 to-blue-600')"></div>
+
+        <!-- En-tête avec avatar -->
+        <div class="p-6 pb-4">
+          <div class="flex items-center space-x-4">
+            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-lg">
+              {{ (rdv.patient?.user?.prenom?.charAt(0) || '') + (rdv.patient?.user?.nom?.charAt(0) || '') }}
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-bold text-gray-800">{{ rdv.patient?.user?.prenom }} {{ rdv.patient?.user?.nom }}</h3>
+              <p class="text-sm text-gray-500 font-mono">#{{ rdv.id }}</p>
+            </div>
           </div>
-          <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm font-medium">
-            {{ getStatutText(rdv.statut) }}
-          </span>
         </div>
       </div>
 
-      <div class="p-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div class="space-y-3">
-            <div class="flex items-center space-x-3">
-              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <i class="fas fa-calendar text-blue-600"></i>
-              </div>
-              <div>
-                <p class="text-sm text-gray-500">Date</p>
-                <p class="text-gray-800 font-medium">{{ rdv.date_rendezvous | date:'dd/MM/yyyy' }}</p>
-              </div>
+      <!-- Informations principales -->
+      <div class="px-6 pb-6 space-y-4">
+
+        <!-- Date et heure -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
+            <div class="flex items-center space-x-2 mb-2">
+              <i class="fas fa-calendar-day text-blue-600"></i>
+              <span class="text-xs font-semibold text-gray-600 uppercase">Date</span>
             </div>
-            <div class="flex items-center space-x-3">
-              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <i class="fas fa-clock text-blue-600"></i>
-              </div>
-              <div>
-                <p class="text-sm text-gray-500">Heure</p>
-                <p class="text-gray-800 font-medium">{{ rdv.heure_rendezvous }}</p>
-              </div>
-            </div>
+            <p class="text-sm font-bold text-gray-800">{{ rdv.date_rendezvous | date:'dd/MM/yyyy' }}</p>
           </div>
-          <div class="space-y-3">
-            <div class="flex items-center space-x-3">
-              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <i class="fas fa-user text-blue-600"></i>
-              </div>
-              <div>
-                <p class="text-sm text-gray-500">Patient</p>
-                <p class="text-gray-800 font-medium">{{ rdv.patient?.user?.prenom }} {{ rdv.patient?.user?.nom }}</p>
-              </div>
+          <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-100">
+            <div class="flex items-center space-x-2 mb-2">
+              <i class="fas fa-clock text-purple-600"></i>
+              <span class="text-xs font-semibold text-gray-600 uppercase">Heure</span>
             </div>
-            <div class="flex items-center space-x-3">
-              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <i class="fas fa-phone text-blue-600"></i>
-              </div>
-              <div>
-                <p class="text-sm text-gray-500">Téléphone</p>
-                <p class="text-gray-800 font-medium">{{ rdv.patient?.user?.telephone || 'Non renseigné' }}</p>
-              </div>
+            <p class="text-sm font-bold text-gray-800">{{ rdv.heure_rendezvous }}</p>
+          </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="bg-gray-50 rounded-xl p-4 space-y-2">
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <i class="fas fa-phone text-blue-600 text-sm"></i>
+            </div>
+            <span class="text-sm text-gray-700">{{ rdv.patient?.user?.telephone || 'Non renseigné' }}</span>
+          </div>
+        </div>
+
+        <!-- Motif -->
+        <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-100">
+          <div class="flex items-start space-x-2">
+            <i class="fas fa-notes-medical text-amber-600 mt-1"></i>
+            <div class="flex-1">
+              <p class="text-xs font-semibold text-gray-600 uppercase mb-1">Motif</p>
+              <p class="text-sm text-gray-800 line-clamp-2">{{ rdv.motif || 'Non spécifié' }}</p>
             </div>
           </div>
         </div>
 
-        <div class="mb-6">
-          <p class="text-sm text-gray-500 mb-2">Motif</p>
-          <p class="text-gray-800 bg-gray-50 p-3 rounded-lg">{{ rdv.motif || 'Non spécifié' }}</p>
-        </div>
-
-        <div class="flex space-x-3">
+        <!-- Boutons d'action -->
+        <div class="flex space-x-2 pt-2">
           <button *ngIf="rdv.statut === RendezVousStatut.EN_ATTENTE"
-                  class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-                  (click)="confirmerRendezVous(rdv.id)">
-            <i class="fas fa-check"></i>
+                  class="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  (click)="confirmerRendezVous(rdv.id)"
+                  [disabled]="processingAction">
+            <i class="fas fa-check-circle"></i>
             <span>Confirmer</span>
           </button>
-          <button *ngIf="rdv.statut !== RendezVousStatut.ANNULE"
-                  class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-                  (click)="annulerRendezVous(rdv.id)">
-            <i class="fas fa-times"></i>
+          <button *ngIf="rdv.statut !== RendezVousStatut.ANNULE && rdv.statut !== RendezVousStatut.TERMINE"
+                  class="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  (click)="annulerRendezVous(rdv.id)"
+                  [disabled]="processingAction">
+            <i class="fas fa-times-circle"></i>
             <span>Annuler</span>
           </button>
-          <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
-            <i class="fas fa-eye"></i>
-            <span>Détails</span>
+          <button *ngIf="rdv.statut === RendezVousStatut.ANNULE || rdv.statut === RendezVousStatut.TERMINE"
+                  class="flex-1 bg-gray-100 text-gray-600 px-4 py-3 rounded-xl font-semibold flex items-center justify-center space-x-2">
+            <i class="fas fa-info-circle"></i>
+            <span>{{ rdv.statut === RendezVousStatut.ANNULE ? 'Annulé' : 'Terminé' }}</span>
           </button>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Modal de confirmation d'annulation -->
+<div *ngIf="showConfirmModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in" (click)="closeCancelModal()">
+  <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all" (click)="$event.stopPropagation()">
+
+    <!-- Header du Modal -->
+    <div class="bg-gradient-to-r from-red-500 to-red-600 px-8 py-6 text-white relative overflow-hidden">
+      <div class="absolute inset-0 bg-pattern opacity-10"></div>
+      <div class="relative flex items-center space-x-4">
+        <div class="w-14 h-14 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+          <i class="fas fa-exclamation-triangle text-3xl"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold">Confirmer l'annulation</h2>
+          <p class="text-red-100 text-sm mt-1">Action irréversible</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenu du Modal -->
+    <div class="p-8">
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-calendar-times text-red-600 text-2xl"></i>
+        </div>
+        <p class="text-gray-800 text-lg font-semibold mb-2">
+          Êtes-vous sûr de vouloir annuler ce rendez-vous ?
+        </p>
+      </div>
+
+      <div class="bg-amber-50 border-l-4 border-amber-400 rounded-lg p-4 mb-6">
+        <div class="flex items-start space-x-3">
+          <i class="fas fa-info-circle text-amber-600 mt-1"></i>
+          <p class="text-amber-800 text-sm">
+            Le patient sera automatiquement notifié de cette annulation par email.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer du Modal -->
+    <div class="bg-gray-50 px-8 py-5 flex space-x-3">
+      <button
+        (click)="closeCancelModal()"
+        class="flex-1 px-6 py-3 bg-white hover:bg-gray-100 text-gray-700 rounded-xl font-semibold transition-all border-2 border-gray-200 hover:border-gray-300 disabled:opacity-50"
+        [disabled]="processingAction">
+        <i class="fas fa-arrow-left mr-2"></i>
+        Retour
+      </button>
+      <button
+        (click)="confirmCancellation()"
+        class="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl font-semibold transition-all shadow-md hover:shadow-lg disabled:opacity-50 flex items-center justify-center space-x-2"
+        [disabled]="processingAction">
+        <i class="fas fa-check" [class.fa-spin]="processingAction"></i>
+        <span>{{ processingAction ? 'Annulation...' : 'Confirmer' }}</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.2s ease-out;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .bg-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  .group:hover {
+    transform: translateY(-4px);
+  }
+</style>

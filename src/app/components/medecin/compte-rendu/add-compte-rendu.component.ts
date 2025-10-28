@@ -1,42 +1,63 @@
-import { Component, OnInit } from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CompteRenduService } from '../../../services/compte-rendu.service';
-import { Router, ActivatedRoute } from '@angular/router';
-import {CommonModule} from '@angular/common';
+import { CommonModule } from '@angular/common';
 
+interface Consultation {
+  id: number;
+  rendezvous_id?: number;
+  rendezvous?: {
+    id?: number;
+    patient?: {
+      id?: number;
+      user?: {
+        id?: number;
+        prenom: string;
+        nom: string;
+      }
+    };
+    date_heure?: string;
+    date_rendezvous?: string;
+  };
+  date_consultation?: Date;
+  motif?: string;
+  statut?: string;
+  compte_rendu?: any;
+  paiement_id?: number;
+  paiement?: any;
+  created_at?: Date;
+  updated_at?: Date;
+}
 
 @Component({
   selector: 'app-add-compte-rendu',
   templateUrl: './add-compte-rendu.component.html',
   standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    CommonModule
-  ],
+  imports: [ReactiveFormsModule, CommonModule]
 })
 export class AddCompteRenduComponent implements OnInit {
+  @Input() isEditMode = false;
+  @Input() compteRenduId: number | null = null;
+  @Input() consultations: Consultation[] = [];
+  @Output() onSuccess = new EventEmitter<void>();
+  @Output() onCancel = new EventEmitter<void>();
+
   compteRenduForm!: FormGroup;
-  isSubmitting: boolean = false;
-  errorMessage: string = '';
-  successMessage: string = '';
-  isEditMode: boolean = false;
-  compteRenduId: string | null = null;
+  isSubmitting = false;
+  errorMessage = '';
+  successMessage = '';
+  selectedConsultation: Consultation | null = null;
 
   constructor(
     private fb: FormBuilder,
-    private compteRenduService: CompteRenduService,
-    private route: ActivatedRoute,
-    private router: Router
+    private compteRenduService: CompteRenduService
   ) {}
 
   ngOnInit(): void {
     this.initForm();
 
-    this.compteRenduId = this.route.snapshot.paramMap.get('id');
-    this.isEditMode = !!this.compteRenduId;
-
     if (this.isEditMode && this.compteRenduId) {
-      this.loadCompteRendu(this.compteRenduId);
+      this.loadCompteRendu(this.compteRenduId.toString());
     }
   }
 
@@ -50,6 +71,12 @@ export class AddCompteRenduComponent implements OnInit {
     });
   }
 
+  onConsultationChange(consultationId: string): void {
+    this.selectedConsultation = this.consultations.find(
+      c => c.id === parseInt(consultationId)
+    ) || null;
+  }
+
   loadCompteRendu(id: string): void {
     this.compteRenduService.getById(id).subscribe({
       next: (data) => {
@@ -60,6 +87,7 @@ export class AddCompteRenduComponent implements OnInit {
           observation: data.observation,
           date_creation: this.formatDate(data.date_creation)
         });
+        this.onConsultationChange(data.consultation_id.toString());
       },
       error: (error) => {
         this.errorMessage = 'Erreur lors du chargement du compte rendu';
@@ -88,39 +116,40 @@ export class AddCompteRenduComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    const formData = this.compteRenduForm.value;
+    const formData = {
+      ...this.compteRenduForm.value,
+      consultation_id: parseInt(this.compteRenduForm.value.consultation_id)
+    };
 
     if (this.isEditMode && this.compteRenduId) {
-      this.compteRenduService.update(this.compteRenduId, formData).subscribe({
-        next: () => {
+      this.compteRenduService.update(this.compteRenduId.toString(), formData).subscribe({
+        next: (response) => {
           this.successMessage = 'Compte rendu modifié avec succès';
           this.isSubmitting = false;
-          setTimeout(() => this.router.navigate(['/comptes-rendus']), 1500);
+          setTimeout(() => this.onSuccess.emit(), 1000);
         },
         error: (error) => {
-          this.errorMessage = 'Erreur lors de la modification';
+          this.errorMessage = this.getBackendErrorMessage(error);
           this.isSubmitting = false;
-          console.error('Erreur:', error);
         }
       });
     } else {
       this.compteRenduService.create(formData).subscribe({
-        next: () => {
+        next: (response) => {
           this.successMessage = 'Compte rendu créé avec succès';
           this.isSubmitting = false;
-          setTimeout(() => this.router.navigate(['/comptes-rendus']), 1500);
+          setTimeout(() => this.onSuccess.emit(), 1000);
         },
         error: (error) => {
-          this.errorMessage = 'Erreur lors de la création';
+          this.errorMessage = this.getBackendErrorMessage(error);
           this.isSubmitting = false;
-          console.error('Erreur:', error);
         }
       });
     }
   }
 
-  onCancel(): void {
-    this.router.navigate(['/comptes-rendus']);
+  handleCancel(): void {
+    this.onCancel.emit();
   }
 
   isFieldInvalid(fieldName: string): boolean {
@@ -134,8 +163,19 @@ export class AddCompteRenduComponent implements OnInit {
       return 'Ce champ est requis';
     }
     if (field?.hasError('minlength')) {
-      return `Minimum ${field.errors?.['minlength'].requiredLength} caractères`;
+      const minLength = field.errors?.['minlength'].requiredLength;
+      return `Minimum ${minLength} caractères requis`;
     }
     return '';
+  }
+
+  getBackendErrorMessage(error: any): string {
+    if (error.error?.message) return error.error.message;
+    if (error.error?.error) return error.error.error;
+    if (error.status === 404) return 'Consultation non trouvée';
+    if (error.status === 409) return 'Un compte rendu existe déjà pour cette consultation';
+    if (error.status === 400) return 'Données invalides. Veuillez vérifier le formulaire';
+    if (error.status === 401) return 'Non autorisé. Veuillez vous reconnecter';
+    return 'Erreur lors de l\'opération. Veuillez réessayer';
   }
 }

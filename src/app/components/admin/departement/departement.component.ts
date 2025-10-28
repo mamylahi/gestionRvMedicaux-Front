@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Departement } from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/models/departement.model';
-import { DepartementService } from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/services/departement.service';
-import { SpecialiteService } from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/services/specialite.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import {Departement} from '../../../models/departement.model';
+import {DepartementService} from '../../../services/departement.service';
+import {SpecialiteService} from '../../../services/specialite.service';
 
 @Component({
   selector: 'app-departement',
@@ -21,7 +21,19 @@ export class DepartementComponent implements OnInit {
   searchTerm: string = '';
   isLoading: boolean = false;
   errorMessage: string = '';
+  successMessage: string = '';
   specialites: any[] = [];
+
+  // Modal
+  showModal: boolean = false;
+  isEditing: boolean = false;
+  selectedDepartement: Departement | null = null;
+
+  // Nouveau/Édition département
+  newDepartement: any = {
+    nom: '',
+    description: ''
+  };
 
   constructor(
     private departementService: DepartementService,
@@ -40,7 +52,6 @@ export class DepartementComponent implements OnInit {
 
     this.departementService.getAll().subscribe({
       next: (response: any) => {
-        // Gestion des différents formats de réponse
         if (response.success && response.data) {
           this.departements = response.data;
         } else if (Array.isArray(response)) {
@@ -92,19 +103,107 @@ export class DepartementComponent implements OnInit {
     this.filteredDepartements = this.departements;
   }
 
+  // Gestion du modal
+  openAddModal(): void {
+    this.isEditing = false;
+    this.selectedDepartement = null;
+    this.newDepartement = {
+      nom: '',
+      description: ''
+    };
+    this.showModal = true;
+  }
+
+  openEditModal(departement: Departement): void {
+    this.isEditing = true;
+    this.selectedDepartement = departement;
+    this.newDepartement = {
+      nom: departement.nom,
+      description: departement.description || ''
+    };
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.selectedDepartement = null;
+    this.isEditing = false;
+    this.errorMessage = '';
+  }
+
+  saveDepartement(): void {
+    if (!this.newDepartement.nom || this.newDepartement.nom.length < 3) {
+      this.errorMessage = 'Le nom du département est obligatoire (minimum 3 caractères)';
+      return;
+    }
+
+    if (this.isEditing && this.selectedDepartement) {
+      this.updateDepartement();
+    } else {
+      this.createDepartement();
+    }
+  }
+
+  createDepartement(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.departementService.create(this.newDepartement).subscribe({
+      next: () => {
+        this.successMessage = 'Département créé avec succès';
+        this.closeModal();
+        this.loadDepartements();
+        this.isLoading = false;
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (error: any) => {
+        this.errorMessage = 'Erreur lors de la création du département';
+        this.isLoading = false;
+        console.error('Erreur:', error);
+      }
+    });
+  }
+
+  updateDepartement(): void {
+    if (!this.selectedDepartement) return;
+
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.departementService.update(this.selectedDepartement.id, this.newDepartement).subscribe({
+      next: () => {
+        this.successMessage = 'Département modifié avec succès';
+        this.closeModal();
+        this.loadDepartements();
+        this.isLoading = false;
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (error: any) => {
+        this.errorMessage = 'Erreur lors de la modification du département';
+        this.isLoading = false;
+        console.error('Erreur:', error);
+      }
+    });
+  }
+
   onAdd(): void {
-    this.router.navigate(['/departements/nouveau']);
+    this.openAddModal();
   }
 
   onEdit(id: number): void {
-    this.router.navigate(['/departements/modifier', id]);
+    const departement = this.departements.find(d => d.id === id);
+    if (departement) {
+      this.openEditModal(departement);
+    }
   }
 
   onDelete(id: number): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce département ?')) {
       this.departementService.delete(id).subscribe({
         next: () => {
+          this.successMessage = 'Département supprimé avec succès';
           this.loadDepartements();
+          setTimeout(() => this.successMessage = '', 3000);
         },
         error: (error: any) => {
           this.errorMessage = 'Erreur lors de la suppression';
@@ -142,5 +241,9 @@ export class DepartementComponent implements OnInit {
   getDepartementsAvecSpecialites(): number {
     const deptAvecSpecialites = new Set(this.specialites.map(s => s.departement_id));
     return deptAvecSpecialites.size;
+  }
+
+  getCharCount(field: string): number {
+    return this.newDepartement[field]?.length || 0;
   }
 }

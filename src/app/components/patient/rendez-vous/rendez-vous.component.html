@@ -44,7 +44,6 @@
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Médecin</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Motif</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Statut</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
         </tr>
         </thead>
         <tbody class="divide-y divide-gray-200">
@@ -66,14 +65,7 @@
                 {{ formatStatut(rdv.statut) }}
               </span>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm">
-            <button
-              (click)="onView(rdv.id)"
-              class="text-blue-600 hover:text-blue-800 font-medium"
-            >
-              Détails
-            </button>
-          </td>
+
         </tr>
         </tbody>
       </table>

@@ -11,7 +11,7 @@ export class RendezVous {
   date_rendezvous!: Date;
   heure_rendezvous!: string;
   motif?: string;
-  statut!: RendezVousStatut;
+  statut!: string;
   created_at?: Date;
   updated_at?: Date;
 }

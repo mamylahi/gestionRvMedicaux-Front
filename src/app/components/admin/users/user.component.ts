@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/services/auth.service';
+import { SpecialiteService } from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/services/specialite.service';
 
 interface User {
   id: number;
@@ -15,6 +16,12 @@ interface User {
   email_verified_at?: string;
   created_at: string;
   updated_at: string;
+  specialite_id?: number;
+}
+
+interface Specialite {
+  id: number;
+  nom: string;
 }
 
 @Component({
@@ -26,6 +33,7 @@ interface User {
 export class UserComponent implements OnInit {
   users: User[] = [];
   filteredUsers: User[] = [];
+  specialites: Specialite[] = [];
   isLoading: boolean = false;
   errorMessage: string = '';
   successMessage: string = '';
@@ -44,6 +52,9 @@ export class UserComponent implements OnInit {
   selectedUser: User | null = null;
   isEditing: boolean = false;
 
+  // Contrôle affichage spécialité
+  showSpecialiteField: boolean = false;
+
   // Nouvel utilisateur
   newUser: any = {
     nom: '',
@@ -53,13 +64,18 @@ export class UserComponent implements OnInit {
     telephone: '',
     adresse: '',
     password: '',
-    password_confirmation: ''
+    password_confirmation: '',
+    specialite_id: ''
   };
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private specialiteService: SpecialiteService
+  ) {}
 
   ngOnInit(): void {
     this.loadUsers();
+    this.loadSpecialites();
   }
 
   loadUsers(): void {
@@ -85,6 +101,34 @@ export class UserComponent implements OnInit {
         console.error('Erreur:', error);
       }
     });
+  }
+
+  loadSpecialites(): void {
+    this.specialiteService.getAll().subscribe({
+      next: (data: any) => {
+        if (data && data.data) {
+          this.specialites = Array.isArray(data.data) ? data.data : [data.data];
+        } else if (Array.isArray(data)) {
+          this.specialites = data;
+        } else {
+          this.specialites = [];
+        }
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des spécialités:', error);
+      }
+    });
+  }
+
+  onRoleChange(): void {
+    const role = this.newUser.role;
+
+    if (role === 'medecin') {
+      this.showSpecialiteField = true;
+    } else {
+      this.showSpecialiteField = false;
+      this.newUser.specialite_id = '';
+    }
   }
 
   onSearch(): void {
@@ -166,6 +210,7 @@ export class UserComponent implements OnInit {
   openAddUserModal(): void {
     this.isEditing = false;
     this.selectedUser = null;
+    this.showSpecialiteField = false;
     this.newUser = {
       nom: '',
       prenom: '',
@@ -174,7 +219,8 @@ export class UserComponent implements OnInit {
       telephone: '',
       adresse: '',
       password: '',
-      password_confirmation: ''
+      password_confirmation: '',
+      specialite_id: ''
     };
     this.showUserModal = true;
   }
@@ -182,6 +228,7 @@ export class UserComponent implements OnInit {
   openEditUserModal(user: User): void {
     this.isEditing = true;
     this.selectedUser = user;
+    this.showSpecialiteField = user.role === 'medecin';
     this.newUser = {
       nom: user.nom,
       prenom: user.prenom,
@@ -190,7 +237,8 @@ export class UserComponent implements OnInit {
       telephone: user.telephone || '',
       adresse: user.adresse || '',
       password: '',
-      password_confirmation: ''
+      password_confirmation: '',
+      specialite_id: user.specialite_id || ''
     };
     this.showUserModal = true;
   }
@@ -199,6 +247,7 @@ export class UserComponent implements OnInit {
     this.showUserModal = false;
     this.selectedUser = null;
     this.isEditing = false;
+    this.showSpecialiteField = false;
   }
 
   saveUser(): void {
@@ -211,7 +260,14 @@ export class UserComponent implements OnInit {
 
   createUser(): void {
     this.isLoading = true;
-    this.authService.register(this.newUser).subscribe({
+    const userData = { ...this.newUser };
+
+    // Ne pas envoyer specialite_id si ce n'est pas un médecin
+    if (userData.role !== 'medecin') {
+      delete userData.specialite_id;
+    }
+
+    this.authService.register(userData).subscribe({
       next: (response) => {
         this.successMessage = 'Utilisateur créé avec succès';
         this.closeUserModal();
@@ -232,10 +288,16 @@ export class UserComponent implements OnInit {
 
     this.isLoading = true;
     const updateData = { ...this.newUser };
+
     // Ne pas envoyer les champs de mot de passe s'ils sont vides
     if (!updateData.password) {
       delete updateData.password;
       delete updateData.password_confirmation;
+    }
+
+    // Ne pas envoyer specialite_id si ce n'est pas un médecin
+    if (updateData.role !== 'medecin') {
+      delete updateData.specialite_id;
     }
 
     this.authService.updateUser(this.selectedUser.id, updateData).subscribe({
@@ -286,6 +348,11 @@ export class UserComponent implements OnInit {
       secretaire: this.users.filter(u => u.role === 'secretaire').length,
       patient: this.users.filter(u => u.role === 'patient').length
     };
+  }
+
+  getSpecialiteNom(specialiteId: number | string): string {
+    const specialite = this.specialites.find(s => s.id == specialiteId);
+    return specialite ? specialite.nom : '';
   }
 
   protected readonly Math = Math;

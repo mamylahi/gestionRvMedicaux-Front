@@ -42,7 +42,7 @@
         <div class="space-y-4 mb-6">
           <div class="flex items-center space-x-3">
             <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-              <i class="fas fa-tint text-green-600"></i>
+              <i class="fas fa-tint text-white text-sm"></i>
             </div>
             <div>
               <p class="text-sm text-gray-500">Groupe sanguin</p>
@@ -51,7 +51,7 @@
           </div>
           <div class="flex items-center space-x-3">
             <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-              <i class="fas fa-calendar text-green-600"></i>
+              <i class="fas fa-calendar text-white text-sm"></i>
             </div>
             <div>
               <p class="text-sm text-gray-500">Date création</p>
@@ -61,17 +61,235 @@
         </div>
 
         <div class="flex space-x-3">
-          <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+          <button class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors"
                   (click)="ouvrirDossier(dossier.id)">
             <i class="fas fa-folder-open"></i>
             <span>Ouvrir</span>
           </button>
-          <button class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-                  (click)="modifierDossier(dossier.id)">
-            <i class="fas fa-edit"></i>
-            <span>Modifier</span>
-          </button>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div *ngIf="showModal" class="fixed inset-0 z-50 overflow-y-auto" (click)="closeModal()">
+  <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+    <!-- Background overlay -->
+    <div class="fixed inset-0 transition-opacity bg-gray-900 bg-opacity-50"></div>
+
+    <!-- Modal panel -->
+    <div class="relative inline-block w-full max-w-5xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-3xl"
+         (click)="$event.stopPropagation()">
+
+      <!-- Modal Header with Gradient -->
+      <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6 text-white relative">
+        <button (click)="closeModal()"
+                class="absolute top-6 right-6 text-white hover:text-gray-200 transition-colors">
+          <i class="fas fa-times text-3xl"></i>
+        </button>
+        <div class="flex items-center space-x-4">
+          <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+            <i class="fas fa-folder-medical text-3xl"></i>
+          </div>
+          <div>
+            <h3 class="text-3xl font-bold">Dossier Médical</h3>
+            <p class="text-blue-100 mt-1" *ngIf="selectedDossier">
+              {{ selectedDossier.patient?.user?.prenom }} {{ selectedDossier.patient?.user?.nom }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-8 max-h-[75vh] overflow-y-auto">
+        <div *ngIf="selectedDossier">
+          <!-- Informations Patient Section -->
+          <div class="bg-white border border-gray-200 rounded-2xl p-6 mb-6 shadow-sm">
+            <div class="flex items-center space-x-3 mb-6">
+              <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-user text-blue-600 text-lg"></i>
+              </div>
+              <h4 class="text-xl font-bold text-gray-800">Informations Patient</h4>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <p class="text-sm text-gray-500 mb-1">Nom complet</p>
+                <p class="text-lg font-semibold text-gray-800">
+                  {{ selectedDossier.patient?.user?.prenom }} {{ selectedDossier.patient?.user?.nom }}
+                </p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500 mb-1">Numéro Patient</p>
+                <p class="text-lg font-semibold text-blue-600">{{ selectedDossier.patient?.numero_patient }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500 mb-1">Email</p>
+                <p class="text-lg font-medium text-gray-800">{{ selectedDossier.patient?.user?.email || 'Non renseigné' }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500 mb-1">Téléphone</p>
+                <p class="text-lg font-medium text-gray-800">{{ selectedDossier.patient?.user?.telephone || 'Non renseigné' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Informations Médicales Section -->
+          <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6 mb-6 shadow-sm">
+            <div class="flex items-center space-x-3 mb-6">
+              <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-heartbeat text-red-600 text-lg"></i>
+              </div>
+              <h4 class="text-xl font-bold text-gray-800">Informations Médicales</h4>
+            </div>
+
+            <div *ngIf="!isEditMode" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <!-- Groupe Sanguin Card -->
+              <div class="bg-white rounded-xl p-5 shadow-sm border border-red-100">
+                <div class="flex items-center justify-center w-14 h-14 bg-red-100 rounded-full mx-auto mb-3">
+                  <i class="fas fa-tint text-red-500 text-2xl"></i>
+                </div>
+                <p class="text-sm text-gray-500 text-center mb-2">Groupe sanguin</p>
+                <p class="text-2xl font-bold text-gray-800 text-center">{{ getGroupeSanguinText(selectedDossier.groupe_sanguin!) }}</p>
+              </div>
+
+              <!-- Placeholder Cards for other medical info -->
+              <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100">
+                <div class="flex items-center justify-center w-14 h-14 bg-blue-100 rounded-full mx-auto mb-3">
+                  <i class="fas fa-pills text-blue-500 text-2xl"></i>
+                </div>
+                <p class="text-sm text-gray-500 text-center mb-2">Traitements</p>
+                <p class="text-lg font-semibold text-gray-800 text-center">-</p>
+              </div>
+
+              <div class="bg-white rounded-xl p-5 shadow-sm border border-green-100">
+                <div class="flex items-center justify-center w-14 h-14 bg-green-100 rounded-full mx-auto mb-3">
+                  <i class="fas fa-notes-medical text-green-500 text-2xl"></i>
+                </div>
+                <p class="text-sm text-gray-500 text-center mb-2">Dossier</p>
+                <p class="text-lg font-semibold text-gray-800 text-center">Complet</p>
+              </div>
+            </div>
+
+            <!-- Edit Mode Form -->
+            <form *ngIf="isEditMode" class="space-y-5">
+              <div>
+                <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-tint text-red-500 mr-2"></i>
+                  Groupe Sanguin
+                  <span class="ml-2 text-xs text-gray-500">(Lecture seule)</span>
+                </label>
+                <input type="text"
+                       [value]="getGroupeSanguinText(selectedDossier.groupe_sanguin!)"
+                       readonly
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed">
+              </div>
+
+              <div>
+                <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>
+                  Allergies
+                </label>
+                <textarea [(ngModel)]="formData.allergies"
+                          name="allergies"
+                          rows="3"
+                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          placeholder="Lister les allergies connues (ex: pénicilline, arachides, latex...)"></textarea>
+              </div>
+
+              <div>
+                <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-history text-purple-500 mr-2"></i>
+                  Antécédents Médicaux
+                </label>
+                <textarea [(ngModel)]="formData.antecedents_medicaux"
+                          name="antecedents_medicaux"
+                          rows="3"
+                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          placeholder="Décrire les antécédents médicaux (diabète, hypertension, asthme...)"></textarea>
+              </div>
+
+              <div>
+                <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-procedures text-orange-500 mr-2"></i>
+                  Antécédents Chirurgicaux
+                </label>
+                <textarea [(ngModel)]="formData.antecedents_chirurgicaux"
+                          name="antecedents_chirurgicaux"
+                          rows="3"
+                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          placeholder="Décrire les interventions chirurgicales antérieures..."></textarea>
+              </div>
+
+              <div>
+                <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-pills text-green-500 mr-2"></i>
+                  Traitements en Cours
+                </label>
+                <textarea [(ngModel)]="formData.traitements_en_cours"
+                          name="traitements_en_cours"
+                          rows="3"
+                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          placeholder="Lister les médicaments et traitements actuels..."></textarea>
+              </div>
+
+              <div>
+                <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-syringe text-cyan-500 mr-2"></i>
+                  Vaccinations
+                </label>
+                <textarea [(ngModel)]="formData.vaccinations"
+                          name="vaccinations"
+                          rows="3"
+                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          placeholder="Lister les vaccinations effectuées et leurs dates..."></textarea>
+              </div>
+
+              <div>
+                <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-clipboard text-gray-500 mr-2"></i>
+                  Notes Additionnelles
+                </label>
+                <textarea [(ngModel)]="formData.notes"
+                          name="notes"
+                          rows="4"
+                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          placeholder="Autres informations pertinentes..."></textarea>
+              </div>
+            </form>
+          </div>
+
+          <!-- Date de création Section -->
+          <div class="bg-gray-50 border border-gray-200 rounded-xl p-5 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                <i class="fas fa-calendar-check text-gray-600"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Date de création du dossier</p>
+                <p class="text-lg font-bold text-gray-800">{{ selectedDossier.date_creation | date:'dd/MM/yyyy' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="bg-gray-50 px-8 py-5 border-t border-gray-200 flex justify-end space-x-4">
+        <button (click)="closeModal()"
+                class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 transition-all font-medium flex items-center space-x-2">
+          <i class="fas fa-times"></i>
+          <span>Fermer</span>
+        </button>
+
+        <button *ngIf="isEditMode"
+                (click)="saveDossier()"
+                [disabled]="loading"
+                class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl transition-all font-medium flex items-center space-x-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+          <i class="fas fa-save"></i>
+          <span>{{ loading ? 'Enregistrement...' : 'Enregistrer' }}</span>
+        </button>
       </div>
     </div>
   </div>

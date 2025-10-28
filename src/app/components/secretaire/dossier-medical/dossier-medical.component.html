@@ -1,60 +1,285 @@
-<div class="dossiers-container">
-  <h2>Dossiers Médicaux</h2>
-
-  <!-- Loading State -->
-  <div *ngIf="loading" class="loading">
-    <p>Chargement des dossiers médicaux...</p>
-  </div>
-
-  <!-- Error State -->
-  <div *ngIf="error && !loading" class="error">
-    <p>{{ error }}</p>
-    <button (click)="loadDossiers()" class="btn-retry">Réessayer</button>
-  </div>
-
-  <!-- Empty State -->
-  <div *ngIf="!loading && !error && dossiers.length === 0" class="empty-state">
-    <p>Aucun dossier médical trouvé</p>
-  </div>
-
-  <!-- Dossiers List -->
-  <div *ngIf="!loading && dossiers.length > 0" class="dossiers-list">
-    <div *ngFor="let dossier of dossiers" class="dossier-card">
-      <div class="dossier-header">
-        <h3>{{ dossier.patient?.user?.nom }} {{ dossier.patient?.user?.prenom }}</h3>
-      </div>
-
-      <div class="dossier-details">
-        <div class="detail-item">
-          <strong>Date de création:</strong>
-          {{ dossier.date_creation | date:'dd/MM/yyyy' }}
+<div class="min-h-screen bg-gray-50 p-6">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <span class="text-blue-600 text-xl">📁</span>
+                    </div>
+                    Dossiers Médicaux
+                </h1>
+                <p class="text-gray-600 mt-2">Gérez les dossiers médicaux des patients</p>
+            </div>
+            <button
+                    (click)="onAdd()"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition flex items-center gap-2 shadow-md"
+            >
+                <span>➕</span>
+                <span>Nouveau Dossier</span>
+            </button>
         </div>
-
-        <div *ngIf="dossier.groupe_sanguin" class="detail-item">
-          <strong>Groupe sanguin:</strong>
-          <span class="groupe-sanguin">
-            {{ getGroupeSanguinIcon(dossier.groupe_sanguin) }}
-            {{ dossier.groupe_sanguin.replace('_', ' ') }}
-          </span>
-        </div>
-
-        <div *ngIf="dossier.patient" class="patient-info">
-          <div class="detail-item">
-            <strong>Email:</strong> {{ dossier.patient.user?.email || 'Non renseigné' }}
-          </div>
-          <div class="detail-item">
-            <strong>Téléphone:</strong> {{ dossier.patient.user?.telephone || 'Non renseigné' }}
-          </div>
-        </div>
-      </div>
-
-      <div class="dossier-actions">
-        <button
-          (click)="ouvrirDossier(dossier)"
-          class="btn-ouvrir">
-          📁 Ouvrir le dossier
-        </button>
-      </div>
     </div>
-  </div>
+
+    <!-- Filtres -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+            <!-- Recherche -->
+            <div class="md:col-span-5">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    🔍 Rechercher
+                </label>
+                <div class="relative">
+                    <input
+                            type="text"
+                            [(ngModel)]="searchTerm"
+                            (input)="onSearch()"
+                            placeholder="Nom du patient, numéro de dossier..."
+                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                    >
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                        <span class="text-gray-400">🔍</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Groupe sanguin -->
+            <div class="md:col-span-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    🩸 Groupe sanguin
+                </label>
+                <select
+                        [(ngModel)]="selectedGroupeSanguin"
+                        (change)="onSearch()"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                >
+                    <option value="">Tous les groupes</option>
+                    <option *ngFor="let groupe of groupesSanguins" [value]="groupe">
+                        {{ groupe }}
+                    </option>
+                </select>
+            </div>
+
+            <!-- Actions -->
+            <div class="md:col-span-3 flex gap-3">
+                <button
+                        (click)="onResetFilters()"
+                        class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg font-medium transition flex items-center justify-center gap-2"
+                >
+                    <span>🔄</span>
+                    <span>Réinitialiser</span>
+                </button>
+                <div class="bg-blue-100 text-blue-800 px-4 py-3 rounded-lg font-semibold min-w-20 text-center">
+                    {{ filteredDossiers.length }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages d'erreur -->
+    <div *ngIf="errorMessage" class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                <span class="text-red-600">⚠️</span>
+            </div>
+            <span class="text-red-800">{{ errorMessage }}</span>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="flex justify-center items-center py-12">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">Chargement des dossiers...</p>
+        </div>
+    </div>
+
+    <!-- Grid des dossiers -->
+    <div *ngIf="!isLoading && filteredDossiers.length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <!-- Carte dossier -->
+        <div
+                *ngFor="let dossier of filteredDossiers"
+                class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300"
+        >
+            <!-- Header -->
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <span class="text-blue-600 text-lg">👤</span>
+                        </div>
+                        <div>
+                            @for (pat of patients; track pat.id){
+                                @if (pat.id === dossier.patient_id ){
+                                    <h3 class="font-semibold text-gray-900 text-lg leading-tight">
+                                        {{ pat.user?.nom + ' ' + pat.user?.prenom}}
+                                    </h3>
+                                    <p class="text-gray-500 text-sm mt-1">
+                                        {{ pat.numero_patient || 'N/A' }}
+                                    </p>
+                                }
+                            }
+                        </div>
+                    </div>
+                    <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
+                        #{{ dossier.id }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Informations -->
+            <div class="p-6">
+                <!-- Groupe sanguin -->
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-gray-600 font-medium">Groupe sanguin</span>
+                    <div *ngIf="dossier.groupe_sanguin; else noGroup">
+                        <span
+                                [ngClass]="getGroupeSanguinBadgeClass(dossier.groupe_sanguin)"
+                                class="px-3 py-1 rounded-full text-sm font-medium text-white"
+                        >
+                            🩸 {{ dossier.groupe_sanguin }}
+                        </span>
+                    </div>
+                    <ng-template #noGroup>
+                        <span class="text-gray-400 text-sm italic">Non renseigné</span>
+                    </ng-template>
+                </div>
+
+                <!-- Date de création -->
+                <div class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+                    <span>📅</span>
+                    <span>Créé le {{ dossier.date_creation | date:'dd/MM/yyyy' }}</span>
+                </div>
+
+                <!-- Action Voir -->
+                <button
+                        (click)="onView(dossier)"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition flex items-center justify-center gap-2 font-medium"
+                >
+                    <span>👁️</span>
+                    <span>Voir le dossier</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- État vide -->
+    <div *ngIf="!isLoading && filteredDossiers.length === 0" class="text-center py-16">
+        <div class="max-w-md mx-auto">
+            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span class="text-4xl text-gray-400">📁</span>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucun dossier médical</h3>
+            <p class="text-gray-600 mb-6">Aucun dossier ne correspond à vos critères de recherche.</p>
+            <button
+                    (click)="onAdd()"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition inline-flex items-center gap-2"
+            >
+                <span>➕</span>
+                <span>Créer un dossier</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de visualisation du dossier -->
+<div *ngIf="showViewModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+        <!-- Header du modal -->
+        <div class="bg-blue-600 text-white p-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
+                        <span class="text-xl">📋</span>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold">Dossier Médical</h2>
+                        <p class="text-blue-100">Informations détaillées du patient</p>
+                    </div>
+                </div>
+                <button
+                        (click)="closeViewModal()"
+                        class="text-white hover:text-blue-200 transition text-2xl"
+                >
+                    ✕
+                </button>
+            </div>
+        </div>
+
+        <!-- Contenu du modal -->
+        <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Informations Patient -->
+                <div class="space-y-6">
+                    <h3 class="text-xl font-semibold text-gray-900 flex items-center gap-3">
+                        <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">👤</span>
+                        Informations Patient
+                    </h3>
+
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                            <span class="text-gray-600 font-medium">Nom complet</span>
+                            <span class="text-gray-900 font-semibold">{{ selectedDossierPatientName }}</span>
+                        </div>
+
+                        <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                            <span class="text-gray-600 font-medium">Numéro patient</span>
+                            <span class="text-gray-900 font-semibold">{{ selectedDossierPatientNumber }}</span>
+                        </div>
+
+                        <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                            <span class="text-gray-600 font-medium">ID Dossier</span>
+                            <span class="text-gray-900 font-semibold">#{{ selectedDossier?.id }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informations Médicales -->
+                <div class="space-y-6">
+                    <h3 class="text-xl font-semibold text-gray-900 flex items-center gap-3">
+                        <span class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600">🏥</span>
+                        Informations Médicales
+                    </h3>
+
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                            <span class="text-gray-600 font-medium">Groupe sanguin</span>
+                            <span
+                                    *ngIf="selectedDossier?.groupe_sanguin; else noGroupModal"
+                                    [ngClass]="getGroupeSanguinBadgeClass(selectedDossier?.groupe_sanguin)"
+                                    class="px-3 py-1 rounded-full text-sm font-medium text-white"
+                            >
+                                🩸 {{ selectedDossier?.groupe_sanguin }}
+                            </span>
+                            <ng-template #noGroupModal>
+                                <span class="text-gray-400 italic">Non renseigné</span>
+                            </ng-template>
+                        </div>
+
+                        <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                            <span class="text-gray-600 font-medium">Date de création</span>
+                            <span class="text-gray-900 font-semibold">{{ selectedDossier?.date_creation | date:'dd/MM/yyyy' }}</span>
+                        </div>
+
+                        <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                            <span class="text-gray-600 font-medium">Dernière mise à jour</span>
+                            <span class="text-gray-900 font-semibold">{{ selectedDossier?.updated_at | date:'dd/MM/yyyy' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer du modal -->
+        <div class="border-t border-gray-200 p-6 bg-gray-50">
+            <div class="flex justify-end">
+                <button
+                        (click)="closeViewModal()"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition"
+                >
+                    Fermer
+                </button>
+            </div>
+        </div>
+    </div>
 </div>

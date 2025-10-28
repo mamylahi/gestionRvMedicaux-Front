@@ -8,7 +8,6 @@ import {AuthInterceptor} from './interceptors/auth.interceptor';
 import {AddConsultationComponent} from './components/admin/consultation/add-consultation.component';
 import {ConsultationComponent} from './components/admin/consultation/consultation.component';
 import {DepartementComponent} from './components/admin/departement/departement.component';
-import {AddDepartementComponent} from './components/admin/departement/add-departement.component';
 import {MedecinComponent} from './components/admin/medecin/medecin.component';
 import { NavbarComponent} from './components/navbar/navbar.component';
 import {DashboardComponent} from './components/dashboard/dashboard.component';
@@ -21,9 +20,10 @@ import {PatientConsultationComponent} from './components/patient/consultation/co
 import {PatientDossierMedicalComponent} from './components/patient/dossier-medical/dossier-medical.component';
 import {PatientPaiementsComponent} from './components/patient/paiement/paiement.component';
 import {PatientRendezVousComponent} from './components/patient/rendez-vous/rendez-vous.component';
-import {SecretaireDossierMedicalComponent} from './components/secretaire/dossier-medical/dossier-medical.component';
-import {SecretairePaiementComponent} from './components/secretaire/paiement/paiement.component';
-import {SecretaireRendezVousComponent} from './components/secretaire/rendez-vous/rendez-vous.component';
+import {ProfileComponent} from './components/profile/profile.component';
+import {RendezvousComponent} from './components/secretaire/rendez-vous/rendez-vous.component';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -38,10 +38,11 @@ import {SecretaireRendezVousComponent} from './components/secretaire/rendez-vous
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
+    CommonModule,
+    FormsModule,
     AddConsultationComponent,
     ConsultationComponent,
     DepartementComponent,
-    AddDepartementComponent,
     MedecinComponent,
     NavbarComponent,
     DashboardComponent,
@@ -54,9 +55,8 @@ import {SecretaireRendezVousComponent} from './components/secretaire/rendez-vous
     PatientDossierMedicalComponent,
     PatientPaiementsComponent,
     PatientRendezVousComponent,
-    SecretaireDossierMedicalComponent,
-    SecretairePaiementComponent,
-    SecretaireRendezVousComponent,
+    ProfileComponent,
+    RendezvousComponent
 
 
 

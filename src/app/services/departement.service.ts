@@ -23,7 +23,7 @@ export class DepartementService {
     return this.http.post<Departement>(this.URL, data);
   }
 
-  update(id: string, data: any) {
+    update(id: number, data: any) {
     return this.http.put<Departement>(`${this.URL}/${id}`, data);
   }
 

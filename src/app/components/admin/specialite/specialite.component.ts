@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Specialite } from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/models/specialite.model';
-import { SpecialiteService } from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/services/specialite.service';
-import { DepartementService } from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/services/departement.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import {Specialite} from '../../../models/specialite.model';
+import {SpecialiteService} from '../../../services/specialite.service';
+import {DepartementService} from '../../../services/departement.service';
 
 @Component({
   selector: 'app-specialite',
@@ -22,8 +22,20 @@ export class SpecialiteComponent implements OnInit {
   selectedDepartement: string = '';
   isLoading: boolean = false;
   errorMessage: string = '';
+  successMessage: string = '';
   departements: any[] = [];
   isLoadingDepartements: boolean = false;
+
+  // Modal
+  showModal: boolean = false;
+  isEditing: boolean = false;
+  selectedSpecialite: Specialite | null = null;
+
+  // Nouveau/Édition spécialité
+  newSpecialite: any = {
+    nom: '',
+    departement_id: ''
+  };
 
   constructor(
     private specialiteService: SpecialiteService,
@@ -42,7 +54,6 @@ export class SpecialiteComponent implements OnInit {
 
     this.specialiteService.getAll().subscribe({
       next: (response: any) => {
-        // Gestion des différents formats de réponse
         if (response.success && response.data) {
           this.specialites = response.data;
         } else if (Array.isArray(response)) {
@@ -66,32 +77,19 @@ export class SpecialiteComponent implements OnInit {
 
     this.departementService.getAll().subscribe({
       next: (response: any) => {
-        console.log('Réponse départements:', response); // Debug
-
-        // Gestion des différents formats de réponse
         if (response.success && response.data) {
           this.departements = response.data;
         } else if (Array.isArray(response)) {
           this.departements = response;
         } else {
           this.departements = [];
-          console.warn('Format de réponse inattendu pour les départements:', response);
         }
-
         this.isLoadingDepartements = false;
       },
       error: (error: any) => {
-        console.error('Erreur complète lors du chargement des départements:', error);
+        console.error('Erreur lors du chargement des départements:', error);
         this.errorMessage = 'Erreur lors du chargement des départements';
         this.isLoadingDepartements = false;
-
-        // Données de test en cas d'erreur
-        this.departements = [
-          { id: 1, nom: 'Médecine Générale' },
-          { id: 2, nom: 'Chirurgie' },
-          { id: 3, nom: 'Pédiatrie' },
-          { id: 4, nom: 'Imagerie Médicale' }
-        ];
       }
     });
   }
@@ -123,19 +121,107 @@ export class SpecialiteComponent implements OnInit {
     this.filteredSpecialites = this.specialites;
   }
 
+  // Gestion du modal
+  openAddModal(): void {
+    this.isEditing = false;
+    this.selectedSpecialite = null;
+    this.newSpecialite = {
+      nom: '',
+      departement_id: ''
+    };
+    this.showModal = true;
+  }
+
+  openEditModal(specialite: Specialite): void {
+    this.isEditing = true;
+    this.selectedSpecialite = specialite;
+    this.newSpecialite = {
+      nom: specialite.nom,
+      departement_id: specialite.departement_id || ''
+    };
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.selectedSpecialite = null;
+    this.isEditing = false;
+    this.errorMessage = '';
+  }
+
+  saveSpecialite(): void {
+    if (!this.newSpecialite.nom || !this.newSpecialite.departement_id) {
+      this.errorMessage = 'Veuillez remplir tous les champs obligatoires';
+      return;
+    }
+
+    if (this.isEditing && this.selectedSpecialite) {
+      this.updateSpecialite();
+    } else {
+      this.createSpecialite();
+    }
+  }
+
+  createSpecialite(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.specialiteService.create(this.newSpecialite).subscribe({
+      next: () => {
+        this.successMessage = 'Spécialité créée avec succès';
+        this.closeModal();
+        this.loadSpecialites();
+        this.isLoading = false;
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (error: any) => {
+        this.errorMessage = 'Erreur lors de la création de la spécialité';
+        this.isLoading = false;
+        console.error('Erreur:', error);
+      }
+    });
+  }
+
+  updateSpecialite(): void {
+    if (!this.selectedSpecialite) return;
+
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.specialiteService.update(this.selectedSpecialite.id, this.newSpecialite).subscribe({
+      next: () => {
+        this.successMessage = 'Spécialité modifiée avec succès';
+        this.closeModal();
+        this.loadSpecialites();
+        this.isLoading = false;
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (error: any) => {
+        this.errorMessage = 'Erreur lors de la modification de la spécialité';
+        this.isLoading = false;
+        console.error('Erreur:', error);
+      }
+    });
+  }
+
   onAdd(): void {
-    this.router.navigate(['/specialites/nouveau']);
+    this.openAddModal();
   }
 
   onEdit(id: number): void {
-    this.router.navigate(['/specialites/modifier', id]);
+    const specialite = this.specialites.find(s => s.id === id);
+    if (specialite) {
+      this.openEditModal(specialite);
+    }
   }
 
   onDelete(id: number): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette spécialité ?')) {
       this.specialiteService.delete(id).subscribe({
         next: () => {
+          this.successMessage = 'Spécialité supprimée avec succès';
           this.loadSpecialites();
+          setTimeout(() => this.successMessage = '', 3000);
         },
         error: (error: any) => {
           this.errorMessage = 'Erreur lors de la suppression';
@@ -154,13 +240,17 @@ export class SpecialiteComponent implements OnInit {
       return specialite.departement.nom;
     }
 
-    // Si le département n'est pas chargé, chercher dans la liste des départements
     if (specialite.departement_id) {
       const dept = this.departements.find(d => d.id === specialite.departement_id);
       return dept?.nom || `Département ${specialite.departement_id}`;
     }
 
     return 'Département non assigné';
+  }
+
+  getDepartementNameById(id: number | string): string {
+    const dept = this.departements.find(d => d.id == id);
+    return dept?.nom || '';
   }
 
   getSpecialiteIcon(nom: string): string {
@@ -210,11 +300,5 @@ export class SpecialiteComponent implements OnInit {
   getUniqueDepartementsCount(): number {
     const uniqueDeptIds = new Set(this.specialites.map(s => s.departement_id).filter(id => id));
     return uniqueDeptIds.size;
-  }
-
-  // Méthode pour debugger
-  debugDepartements(): void {
-    console.log('Départements chargés:', this.departements);
-    console.log('Spécialités chargées:', this.specialites);
   }
 }

@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { Medecin } from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/models/medecin.model';
-import { Specialite } from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/models/specialite.model';
-import { MedecinService } from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/services/medecin.service';
-import { SpecialiteService } from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/services/specialite.service';
+import {Router, RouterLink} from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePipe, NgClass, NgFor } from '@angular/common';
 import { CommonModule } from '@angular/common';
+import {SpecialiteService} from '../../../services/specialite.service';
+import {MedecinService} from '../../../services/medecin.service';
+import {Specialite} from '../../../models/specialite.model';
+import {Medecin} from '../../../models/medecin.model';
 
 @Component({
   selector: 'app-medecin',
@@ -17,7 +17,7 @@ import { CommonModule } from '@angular/common';
     NgClass,
     DatePipe,
     NgFor,
-    CommonModule
+    CommonModule,
   ]
 })
 export class MedecinComponent implements OnInit {

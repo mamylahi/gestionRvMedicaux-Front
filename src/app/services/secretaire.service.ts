@@ -29,7 +29,7 @@ export class SecretaireService {
     return this.http.put<Secretaire>(`${this.URL}/${id}`, data);
   }
 
-  delete(id: number) {
+  deleteRendezVous(id: number) {
     return this.http.delete<any>(`${this.URL}/${id}`);
   }
 

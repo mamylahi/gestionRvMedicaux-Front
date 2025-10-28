@@ -1,61 +1,491 @@
-<div class="paiements-container">
-  <h2>Paiements en Attente</h2>
+<style>
+  /* Styles modernes pour le composant paiement */
 
-  <!-- Loading State -->
-  <div *ngIf="loading" class="loading">
-    <p>Chargement des paiements...</p>
+  /* Container principal */
+  .payment-container {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f6fa 100%);
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  /* Header avec effet glassmorphism */
+  .payment-header {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .payment-header h2 {
+    color: #3a0795;
+    font-weight: 700;
+    font-size: 2rem;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Bouton moderne avec animation */
+  .btn-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 12px 30px;
+    border-radius: 50px;
+    color: white;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px 0 rgba(116, 79, 168, 0.4);
+    cursor: pointer;
+  }
+
+  .btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px 0 rgba(116, 79, 168, 0.6);
+  }
+
+  /* Cartes de paiement avec animation */
+  .payment-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .payment-card {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .payment-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #f8f6fa 0%, #ffffff 100%);
+  }
+
+  .payment-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  /* En-tête de carte */
+  .card-header-modern {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .payment-id {
+    font-size: 0.875rem;
+    color: #667eea;
+    font-weight: 600;
+    background: rgba(102, 126, 234, 0.1);
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+
+  .payment-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2d3748;
+  }
+
+  /* Détails de la carte */
+  .card-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .detail-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #4a5568;
+  }
+
+  .detail-row i {
+    width: 20px;
+    color: #667eea;
+  }
+
+  .detail-label {
+    font-size: 0.875rem;
+    color: #718096;
+    font-weight: 500;
+  }
+
+  .detail-value {
+    font-size: 0.875rem;
+    color: #2d3748;
+    font-weight: 600;
+    margin-left: auto;
+  }
+
+  /* Badges de statut modernes */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .status-badge i {
+    font-size: 0.75rem;
+  }
+
+  .status-en-attente {
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    color: #fff;
+  }
+
+  .status-valide {
+    background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+    color: #fff;
+  }
+
+  .status-annule {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    color: #fff;
+  }
+
+  /* Actions de la carte */
+  .card-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid #5f17b8;
+  }
+
+  .btn-action {
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .btn-edit {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f6fa 100%);
+    color: #5f17b8;
+  }
+
+  .btn-edit:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-delete {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    color: white;
+  }
+
+  .btn-delete:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(250, 112, 154, 0.4);
+  }
+
+  /* État vide avec animation */
+  .empty-state {
+    background: white;
+    border-radius: 20px;
+    padding: 4rem 2rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .empty-state i {
+    font-size: 4rem;
+    color: #cbd5e0;
+    margin-bottom: 1rem;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .empty-state h3 {
+    color: #2d3748;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-state p {
+    color: #718096;
+  }
+
+  /* Modal moderne */
+  .modal-modern .modal-content {
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+  }
+
+  .modal-modern .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 1.5rem 2rem;
+  }
+
+  .modal-modern .modal-title {
+    color: white;
+    font-weight: 600;
+    font-size: 1.25rem;
+  }
+
+  .modal-modern .modal-body {
+    padding: 2rem;
+  }
+
+  .modal-modern .form-label {
+    color: #2d3748;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .modal-modern .form-control,
+  .modal-modern .form-select {
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .modal-modern .form-control:focus,
+  .modal-modern .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+  }
+
+  .modal-modern .modal-footer {
+    border: none;
+    padding: 1.5rem 2rem;
+    background: #f7fafc;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .payment-cards {
+      grid-template-columns: 1fr;
+    }
+
+    .payment-container {
+      padding: 1rem;
+    }
+
+    .payment-header {
+      padding: 1.5rem;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .payment-header h2 {
+      font-size: 1.5rem;
+    }
+  }
+</style>
+
+<div class="payment-container">
+  <div class="payment-header">
+    <h2><i class="fas fa-wallet me-2"></i>Gestion des Paiements</h2>
+    <button class="btn-modern" (click)="openAddModal()">
+      <i class="fas fa-plus me-2"></i>Nouveau Paiement
+    </button>
   </div>
 
-  <!-- Error State -->
-  <div *ngIf="error && !loading" class="error">
-    <p>{{ error }}</p>
-    <button (click)="loadPaiements()" class="btn-retry">Réessayer</button>
-  </div>
-
-  <!-- Summary -->
-  <div *ngIf="!loading && paiements.length > 0" class="summary">
-    <p><strong>Total à régler:</strong> {{ getTotalMontant() }} €</p>
-    <p><strong>Nombre de paiements:</strong> {{ paiements.length }}</p>
-  </div>
-
-  <!-- Empty State -->
-  <div *ngIf="!loading && !error && paiements.length === 0" class="empty-state">
-    <p>Aucun paiement en attente</p>
-  </div>
-
-  <!-- Paiements List -->
-  <div *ngIf="!loading && paiements.length > 0" class="paiements-list">
-    <div *ngFor="let paiement of paiements" class="paiement-card">
-      <div class="paiement-header">
-        <h3>Consultation #{{ paiement.consultation_id }}</h3>
-        <span class="montant">{{ paiement.montant }} €</span>
+  <!-- Grille de cartes de paiement -->
+  <div class="payment-cards" *ngIf="paiements.length > 0">
+    <div class="payment-card" *ngFor="let paiement of paiements">
+      <div class="card-header-modern">
+        <span class="payment-id">#{{ paiement.id }}</span>
+        <span class="payment-amount">{{ paiement.montant | currency:'XOF' }}</span>
       </div>
 
-      <div class="paiement-details">
-        <div class="detail-item">
-          <strong>Date:</strong> {{ paiement.date_paiement | date:'dd/MM/yyyy' }}
+      <div class="card-details">
+        <div class="detail-row">
+          <i class="fas fa-calendar-alt"></i>
+          <span class="detail-label">Date</span>
+          <span class="detail-value">{{ paiement.date_paiement | date:'dd/MM/yyyy' }}</span>
         </div>
-        <div class="detail-item">
-          <strong>Moyen de paiement:</strong>
-          <span class="moyen-paiement">
-            {{ getMoyenPaiementIcon(paiement.moyen_paiement) }}
-            {{ paiement.moyen_paiement }}
+
+        <div class="detail-row">
+          <i class="fas fa-credit-card"></i>
+          <span class="detail-label">Moyen</span>
+          <span class="detail-value">{{ paiement.moyen_paiement }}</span>
+        </div>
+
+        <div class="detail-row">
+          <i class="fas fa-stethoscope"></i>
+          <span class="detail-label">Consultation</span>
+          <span class="detail-value">#{{ paiement.consultation_id }}</span>
+        </div>
+
+        <div class="detail-row">
+          <i class="fas fa-info-circle"></i>
+          <span class="detail-label">Statut</span>
+          <span [ngClass]="{
+            'status-badge status-en-attente': paiement.statut === statutEnum.EN_ATTENTE,
+            'status-badge status-valide': paiement.statut === statutEnum.VALIDE,
+            'status-badge status-annule': paiement.statut === statutEnum.ANNULE
+          }">
+            <i class="fas fa-circle"></i>
+            {{ paiement.statut }}
           </span>
         </div>
-        <div class="detail-item">
-          <strong>Statut:</strong>
-          <span class="statut statut-impaye">{{ paiement.statut }}</span>
-        </div>
       </div>
 
-      <div class="paiement-actions">
-        <button
-          (click)="payerPaiement(paiement)"
-          class="btn-payer"
-          [disabled]="paiement.statut === 'valide'">
-          Payer maintenant
+      <div class="card-actions">
+        <button class="btn-action btn-edit" (click)="openEditModal(paiement)">
+          <i class="fas fa-edit me-1"></i>Modifier
+        </button>
+        <button class="btn-action btn-delete" (click)="deletePaiement(paiement.id)">
+          <i class="fas fa-trash me-1"></i>Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- État vide -->
+  <div class="empty-state" *ngIf="paiements.length === 0">
+    <i class="fas fa-receipt"></i>
+    <h3>Aucun paiement enregistré</h3>
+    <p>Cliquez sur "Nouveau Paiement" pour ajouter votre premier paiement</p>
+  </div>
+</div>
+
+<!-- Modal pour ajouter/modifier un paiement -->
+<div class="modal fade show modal-modern" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-receipt me-2"></i>{{ modalTitle }}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form #paiementForm="ngForm" (ngSubmit)="savePaiement()">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="montant"  class="form-label">Montant (XOF)</label>
+              <input type="number" id="montant" disabled class="form-control" name="montant"
+                     required min="0" step="0.01"
+                     [(ngModel)]="currentPaiement.montant"
+                     #montant="ngModel">
+              <div *ngIf="montant.invalid && montant.touched" class="text-danger small">
+                Le montant est requis et doit être positif
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="date_paiement" class="form-label">Date de paiement</label>
+              <input type="date" id="date_paiement" disabled class="form-control" name="date_paiement"
+                     required [(ngModel)]="currentPaiement.date_paiement"
+                     #datePaiement="ngModel">
+              <div *ngIf="datePaiement.invalid && datePaiement.touched" class="text-danger small">
+                La date de paiement est requise
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="statut" class="form-label">Statut</label>
+            <select id="statut" class="form-select" name="statut"
+                    required [(ngModel)]="currentPaiement.statut"
+                    #statut="ngModel">
+              <option value="">Sélectionnez un statut</option>
+              <option *ngFor="let s of getStatutValues()" [value]="s">{{ s }}</option>
+            </select>
+            <div *ngIf="statut.invalid && statut.touched" class="text-danger small">
+              Le statut est requis
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="moyen_paiement" class="form-label">Moyen de paiement</label>
+            <select id="moyen_paiement" class="form-select" name="moyen_paiement"
+                    required [(ngModel)]="currentPaiement.moyen_paiement"
+                    #moyenPaiement="ngModel">
+              <option value="">Sélectionnez un moyen</option>
+              <option value="espece">Espèces</option>
+              <option value="carte">Carte </option>
+              <option value="mobile_money">Paiement mobile</option>
+            </select>
+            <div *ngIf="moyenPaiement.invalid && moyenPaiement.touched" class="text-danger small">
+              Le moyen de paiement est requis
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="consultation_id" class="form-label">ID Consultation</label>
+            <input type="number" id="consultation_id" disabled class="form-control" name="consultation_id"
+                   required min="1" [(ngModel)]="currentPaiement.consultation_id"
+                   #consultationId="ngModel">
+            <div *ngIf="consultationId.invalid && consultationId.touched" class="text-danger small">
+              L'ID de consultation est requis
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">
+          <i class="fas fa-times me-1"></i>Annuler
+        </button>
+        <button type="button" class="btn-modern"
+                (click)="savePaiement()"
+                [disabled]="paiementForm.invalid">
+          <i class="fas fa-save me-1"></i>
+          {{ isEditMode ? 'Modifier' : 'Enregistrer' }}
         </button>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Overlay pour le modal -->
+<div class="modal-backdrop fade show" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" (click)="closeModal()"></div>

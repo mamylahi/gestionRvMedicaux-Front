@@ -1,21 +1,32 @@
 import { Component, OnInit } from '@angular/core';
 import { MedecinService } from '../../../services/medecin.service';
+import { DossierMedicalService } from '../../../services/dossier-medical.service';
 import { Patient } from '../../../models/patient.model';
+import { DossierMedical } from '../../../models/dossiermedical.model';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-patient',
   templateUrl: './patient.component.html',
-  imports: [
-    CommonModule,
-  ]
+  imports: [CommonModule]
 })
 export class MedecinPatientComponent implements OnInit {
   patients: Patient[] = [];
   loading = false;
   errorMessage = '';
 
-  constructor(private medecinService: MedecinService) { }
+  // Modal
+  showModal = false;
+  selectedDossierMedical: DossierMedical | null = null;
+  loadingDossier = false;
+  dossierErrorMessage = '';
+
+  constructor(
+    private medecinService: MedecinService,
+    private dossierMedicalService: DossierMedicalService,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     this.loadMesPatients();
@@ -29,7 +40,7 @@ export class MedecinPatientComponent implements OnInit {
       next: (data: Patient[]) => {
         this.patients = data;
         this.loading = false;
-        console.log(this.patients);
+        console.log('Patients chargés:', this.patients);
       },
       error: (error: any) => {
         this.errorMessage = 'Erreur lors du chargement des patients';
@@ -59,9 +70,49 @@ export class MedecinPatientComponent implements OnInit {
 
   voirDossierMedical(patientId: number): void {
     console.log('Voir dossier médical du patient:', patientId);
+    this.loadingDossier = true;
+    this.dossierErrorMessage = '';
+    this.showModal = true;
+
+    // Charger le dossier médical du patient
+    this.dossierMedicalService.getByPatientId(patientId).subscribe({
+      next: (dossier: DossierMedical) => {
+        this.selectedDossierMedical = dossier;
+        this.loadingDossier = false;
+        console.log('Dossier médical chargé:', dossier);
+      },
+      error: (error: any) => {
+        this.dossierErrorMessage = 'Erreur lors du chargement du dossier médical';
+        this.loadingDossier = false;
+        console.error('Erreur:', error);
+      }
+    });
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.selectedDossierMedical = null;
+    this.dossierErrorMessage = '';
+  }
+
+  getGroupeSanguinText(groupe: string | undefined): string {
+    return groupe || 'Non renseigné';
+  }
+
+  formatDate(date: any): string {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString('fr-FR');
   }
 
   prendreRendezVous(patientId: number): void {
     console.log('Prendre rendez-vous pour le patient:', patientId);
+    // Navigation vers la page de rendez-vous
+    this.router.navigate(['/rendez-vous'], { queryParams: { patientId } });
+  }
+
+  contacterPatient(patient: Patient): void {
+    if (patient.user?.email) {
+      window.location.href = `mailto:${patient.user.email}`;
+    }
   }
 }

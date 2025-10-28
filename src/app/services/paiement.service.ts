@@ -15,7 +15,7 @@ export class PaiementService {
     return this.http.get<any>(this.URL);
   }
 
-  getById(id: string) {
+  getById(id: number) {
     return this.http.get<Paiement>(`${this.URL}/${id}`);
   }
 
@@ -23,7 +23,7 @@ export class PaiementService {
     return this.http.post<Paiement>(this.URL, data);
   }
 
-  update(id: string, data: any) {
+  update(id: number, data: Paiement) {
     return this.http.put<Paiement>(`${this.URL}/${id}`, data);
   }
 

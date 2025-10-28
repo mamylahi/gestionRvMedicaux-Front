@@ -1,135 +1,197 @@
 <div class="container mx-auto px-4 py-8">
-  <div class="bg-white rounded-lg shadow-md p-6">
-    <!-- En-tête -->
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold text-gray-800">Mon Dossier Médical</h1>
-      <button
-        *ngIf="dossierMedical"
-        (click)="onEdit()"
-        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-      >
-        Modifier
-      </button>
-    </div>
-
+  <div class="bg-white rounded-lg shadow-md">
     <!-- Message d'erreur -->
     <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-      {{ errorMessage }}
+      <div class="flex items-center">
+        <i class="fas fa-exclamation-circle mr-2"></i>
+        {{ errorMessage }}
+      </div>
     </div>
 
     <!-- Chargement -->
-    <div *ngIf="isLoading" class="text-center py-8">
-      <p class="text-gray-600">Chargement en cours...</p>
+    <div *ngIf="isLoading" class="text-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+      <p class="text-gray-600 mt-4">Chargement du dossier médical...</p>
     </div>
 
     <!-- Affichage du dossier médical -->
-    <div *ngIf="!isLoading && dossierMedical" class="space-y-6">
-      <!-- Informations générales -->
-      <div class="bg-gray-50 p-6 rounded-lg">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Informations Générales</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">Patient</label>
-            <p class="text-gray-900">
-              {{ dossierMedical.patient?.user?.prenom }} {{ dossierMedical.patient?.user?.nom }}
-            </p>
+    <div *ngIf="!isLoading && dossierMedical">
+      <!-- En-tête avec gradient -->
+      <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6 text-white rounded-t-lg relative">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+              <i class="fas fa-folder-medical text-3xl"></i>
+            </div>
+            <div>
+              <h1 class="text-3xl font-bold">Mon Dossier Médical</h1>
+              <p class="text-blue-100 mt-1">
+                {{ patient?.user?.prenom }} {{ patient?.user?.nom }}
+              </p>
+            </div>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">Groupe Sanguin</label>
-            <p class="text-gray-900 font-semibold">
-              {{ formatGroupeSanguin(dossierMedical.groupe_sanguin) }}
-            </p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">Date de Création</label>
-            <p class="text-gray-900">
-              {{ dossierMedical.date_creation | date: 'dd/MM/yyyy' }}
-            </p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">Dernière Mise à Jour</label>
-            <p class="text-gray-900">
-              {{ dossierMedical.updated_at | date: 'dd/MM/yyyy HH:mm' }}
-            </p>
+          <div class="text-right">
+            <p class="text-sm text-blue-100">N° Patient</p>
+            <p class="text-xl font-bold">{{ patient?.numero_patient || 'N/A' }}</p>
           </div>
         </div>
       </div>
 
-      <!-- Informations du patient -->
-      <div class="bg-blue-50 p-6 rounded-lg" *ngIf="dossierMedical.patient">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Informations Patient</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">Nom Complet</label>
-            <p class="text-gray-900">
-              {{ dossierMedical.patient.user?.prenom }} {{ dossierMedical.patient.user?.nom }}
-            </p>
+      <!-- Corps du dossier -->
+      <div class="p-8 space-y-6">
+        <!-- Statistiques rapides -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Groupe Sanguin -->
+          <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-5 shadow-sm border border-red-200">
+            <div class="flex items-center justify-center w-14 h-14 bg-red-500 rounded-full mx-auto mb-3">
+              <i class="fas fa-tint text-white text-2xl"></i>
+            </div>
+            <p class="text-sm text-gray-600 text-center mb-2">Groupe sanguin</p>
+            <p class="text-2xl font-bold text-red-700 text-center">{{ formatGroupeSanguin(dossierMedical.groupe_sanguin) }}</p>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">Téléphone</label>
-            <p class="text-gray-900">
-              {{ dossierMedical.patient.user?.telephone || 'Non renseigné' }}
-            </p>
-          </div>
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-600 mb-1">Adresse</label>
-            <p class="text-gray-900">
-              {{ dossierMedical.patient.user?.adresse || 'Non renseignée' }}
-            </p>
-          </div>
-        </div>
-      </div>
 
-      <!-- Alertes médicales -->
-      <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-lg">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-          <svg class="w-6 h-6 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          Informations Importantes
-        </h2>
-        <div class="space-y-2">
-          <div class="flex items-start">
-            <span class="font-medium text-gray-700 mr-2">•</span>
-            <p class="text-gray-700">
-              Assurez-vous de communiquer votre groupe sanguin <strong>{{ formatGroupeSanguin(dossierMedical.groupe_sanguin) }}</strong> en cas d'urgence.
-            </p>
+          <!-- Nombre de consultations -->
+          <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 shadow-sm border border-blue-200">
+            <div class="flex items-center justify-center w-14 h-14 bg-blue-500 rounded-full mx-auto mb-3">
+              <i class="fas fa-stethoscope text-white text-2xl"></i>
+            </div>
+            <p class="text-sm text-gray-600 text-center mb-2">Consultations</p>
+            <p class="text-2xl font-bold text-blue-700 text-center">{{ nombreConsultations }}</p>
           </div>
-          <div class="flex items-start">
-            <span class="font-medium text-gray-700 mr-2">•</span>
-            <p class="text-gray-700">
-              Informez toujours votre médecin de vos allergies et antécédents médicaux.
-            </p>
-          </div>
-        </div>
-      </div>
 
-      <!-- Statistiques rapides -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-green-50 p-4 rounded-lg text-center">
-          <p class="text-sm text-gray-600 mb-1">Consultations</p>
-          <p class="text-3xl font-bold text-green-600">-</p>
-          <p class="text-xs text-gray-500 mt-1">Voir toutes</p>
+          <!-- Statut Dossier -->
+          <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-5 shadow-sm border border-green-200">
+            <div class="flex items-center justify-center w-14 h-14 bg-green-500 rounded-full mx-auto mb-3">
+              <i class="fas fa-check-circle text-white text-2xl"></i>
+            </div>
+            <p class="text-sm text-gray-600 text-center mb-2">Statut</p>
+            <p class="text-lg font-semibold text-green-700 text-center">Actif</p>
+          </div>
         </div>
-        <div class="bg-purple-50 p-4 rounded-lg text-center">
-          <p class="text-sm text-gray-600 mb-1">Rendez-vous</p>
-          <p class="text-3xl font-bold text-purple-600">-</p>
-          <p class="text-xs text-gray-500 mt-1">Voir tous</p>
+
+        <!-- Informations Patient -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+          <div class="flex items-center space-x-3 mb-6">
+            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <i class="fas fa-user text-blue-600 text-lg"></i>
+            </div>
+            <h2 class="text-xl font-bold text-gray-800">Informations Patient</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <p class="text-sm text-gray-500 mb-1">Nom complet</p>
+              <p class="text-lg font-semibold text-gray-800">
+                {{ patient?.user?.prenom }} {{ patient?.user?.nom }}
+              </p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500 mb-1">Numéro Patient</p>
+              <p class="text-lg font-semibold text-blue-600">{{ patient?.numero_patient || 'Non renseigné' }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500 mb-1">Email</p>
+              <p class="text-lg font-medium text-gray-800">
+                <i class="fas fa-envelope text-gray-400 mr-2"></i>
+                {{ patient?.user?.email || 'Non renseigné' }}
+              </p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500 mb-1">Téléphone</p>
+              <p class="text-lg font-medium text-gray-800">
+                <i class="fas fa-phone text-gray-400 mr-2"></i>
+                {{ patient?.user?.telephone || 'Non renseigné' }}
+              </p>
+            </div>
+          </div>
         </div>
-        <div class="bg-orange-50 p-4 rounded-lg text-center">
-          <p class="text-sm text-gray-600 mb-1">Paiements</p>
-          <p class="text-3xl font-bold text-orange-600">-</p>
-          <p class="text-xs text-gray-500 mt-1">Voir tous</p>
+
+        <!-- Dernière consultation -->
+        <div *ngIf="derniereConsultation" class="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-2xl p-6 shadow-sm">
+          <div class="flex items-center space-x-3 mb-6">
+            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+              <i class="fas fa-history text-purple-600 text-lg"></i>
+            </div>
+            <h2 class="text-xl font-bold text-gray-800">Dernière Consultation</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p class="text-sm text-gray-500 mb-1">Date</p>
+              <p class="text-lg font-semibold text-gray-800">
+                <i class="fas fa-calendar text-purple-500 mr-2"></i>
+                {{ derniereConsultation.date_consultation | date:'dd/MM/yyyy' }}
+              </p>
+            </div>
+            <div *ngIf="derniereConsultation.rendezvous?.medecin">
+              <p class="text-sm text-gray-500 mb-1">Médecin</p>
+              <p class="text-lg font-semibold text-gray-800">
+                <i class="fas fa-user-md text-purple-500 mr-2"></i>
+                Dr {{ derniereConsultation.rendezvous.medecin.user?.prenom }} {{ derniereConsultation.rendezvous.medecin.user?.nom }}
+              </p>
+            </div>
+            <div *ngIf="derniereConsultation.rendezvous?.medecin?.specialite" class="md:col-span-2">
+              <p class="text-sm text-gray-500 mb-1">Spécialité</p>
+              <p class="text-lg font-medium text-gray-800">
+                <i class="fas fa-briefcase-medical text-purple-500 mr-2"></i>
+                {{ derniereConsultation.rendezvous.medecin.specialite.nom }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Date de création -->
+        <div class="bg-gray-50 border border-gray-200 rounded-xl p-5 flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+              <i class="fas fa-calendar-check text-gray-600"></i>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Date de création du dossier</p>
+              <p class="text-lg font-bold text-gray-800">{{ dossierMedical.date_creation | date:'dd/MM/yyyy' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alertes médicales -->
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-lg">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <svg class="w-6 h-6 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            Informations Importantes
+          </h2>
+          <div class="space-y-2">
+            <div class="flex items-start">
+              <span class="font-medium text-gray-700 mr-2">•</span>
+              <p class="text-gray-700">
+                Assurez-vous de communiquer votre groupe sanguin <strong>{{ formatGroupeSanguin(dossierMedical.groupe_sanguin) }}</strong> en cas d'urgence.
+              </p>
+            </div>
+            <div class="flex items-start">
+              <span class="font-medium text-gray-700 mr-2">•</span>
+              <p class="text-gray-700">
+                Informez toujours votre médecin de vos allergies et antécédents médicaux.
+              </p>
+            </div>
+            <div class="flex items-start">
+              <span class="font-medium text-gray-700 mr-2">•</span>
+              <p class="text-gray-700">
+                Gardez ce dossier à jour en consultant régulièrement votre médecin.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Message aucun dossier -->
-    <div *ngIf="!isLoading && !dossierMedical && !errorMessage" class="text-center py-8">
+    <div *ngIf="!isLoading && !dossierMedical && !errorMessage" class="text-center py-12">
       <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
       <p class="mt-4 text-gray-600">Aucun dossier médical trouvé.</p>
+      <p class="mt-2 text-sm text-gray-500">Veuillez contacter votre médecin pour créer votre dossier médical.</p>
     </div>
   </div>
 </div>

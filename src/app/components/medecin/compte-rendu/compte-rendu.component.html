@@ -1,77 +1,179 @@
-<div class="min-h-screen bg-gray-50 ml-64 p-6">
-  <div class="flex justify-between items-center mb-8">
-    <h1 class="text-3xl font-bold text-gray-800">Comptes Rendus</h1>
-    <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
-            (click)="loadCompteRenduPatients()" [disabled]="loading">
-      <i class="fas fa-sync-alt"></i>
-      <span>{{ loading ? 'Chargement...' : 'Actualiser' }}</span>
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 ml-64 p-8">
+  <!-- En-tête -->
+  <div class="mb-8">
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">Comptes Rendus</h1>
+        <p class="text-gray-600">Gérez vos comptes rendus médicaux</p>
+      </div>
+      <div class="flex space-x-3">
+        <button
+          class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-xl flex items-center space-x-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+          (click)="ajouterCompteRendu()">
+          <i class="fas fa-plus"></i>
+          <span>Nouveau Compte Rendu</span>
+        </button>
+        <button
+          class="bg-white hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl flex items-center space-x-2 transition-all duration-300 shadow-lg hover:shadow-xl"
+          (click)="loadCompteRenduPatients()"
+          [disabled]="loading">
+          <i class="fas fa-sync-alt" [class.animate-spin]="loading"></i>
+          <span>{{ loading ? 'Chargement...' : 'Actualiser' }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message d'erreur -->
+  <div *ngIf="errorMessage" class="bg-red-50 border-l-4 border-red-500 text-red-700 px-6 py-4 rounded-lg mb-6 shadow-md animate-fade-in">
+    <div class="flex items-center">
+      <i class="fas fa-exclamation-circle text-2xl mr-3"></i>
+      <span class="font-medium">{{ errorMessage }}</span>
+    </div>
+  </div>
+
+  <!-- Loader -->
+  <div *ngIf="loading" class="text-center py-20">
+    <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-600"></div>
+    <p class="text-gray-600 mt-6 text-lg">Chargement des comptes rendus...</p>
+  </div>
+
+  <!-- État vide -->
+  <div *ngIf="!loading && comptesRendus.length === 0" class="text-center py-20 bg-white rounded-3xl shadow-xl">
+    <div class="mb-6">
+      <i class="fas fa-file-medical-alt text-gray-300 text-8xl"></i>
+    </div>
+    <h2 class="text-2xl font-bold text-gray-700 mb-3">Aucun compte rendu</h2>
+    <p class="text-gray-500 mb-8">Commencez par créer votre premier compte rendu médical</p>
+    <button
+      class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-8 py-4 rounded-xl inline-flex items-center space-x-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+      (click)="ajouterCompteRendu()">
+      <i class="fas fa-plus"></i>
+      <span>Créer mon premier compte rendu</span>
     </button>
   </div>
 
-  <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-    {{ errorMessage }}
-  </div>
-
-  <div *ngIf="loading" class="text-center py-12">
-    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-    <p class="text-gray-600 mt-4">Chargement des comptes rendus...</p>
-  </div>
-
-  <div *ngIf="!loading && comptesRendus.length === 0" class="text-center py-12">
-    <div class="text-gray-400 text-6xl mb-4">
-      <i class="fas fa-file-medical-alt"></i>
-    </div>
-    <p class="text-gray-600 text-xl">Aucun compte rendu trouvé</p>
-  </div>
-
-  <div *ngIf="!loading && comptesRendus.length > 0" class="space-y-6">
-    <div *ngFor="let cr of comptesRendus" class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-      <div class="bg-gradient-to-r from-purple-500 to-purple-600 p-6 text-white">
-        <div class="flex justify-between items-center">
-          <div>
-            <h3 class="text-xl font-bold">Compte Rendu #{{ cr.id }}</h3>
-            <p class="opacity-90">{{ cr.consultation?.rendezvous?.patient?.user?.prenom }} {{ cr.consultation?.rendezvous?.patient?.user?.nom }}</p>
+  <!-- Liste des comptes rendus -->
+  <div *ngIf="!loading && comptesRendus.length > 0" class="grid grid-cols-1 gap-6">
+    <div *ngFor="let cr of comptesRendus" class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1">
+      <!-- En-tête du compte rendu -->
+      <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white">
+        <div class="flex justify-between items-start">
+          <div class="flex-1">
+            <div class="flex items-center space-x-3 mb-2">
+              <div class="bg-white bg-opacity-20 rounded-full p-2">
+                <i class="fas fa-file-medical text-2xl"></i>
+              </div>
+              <div>
+                <h3 class="text-2xl font-bold">Compte Rendu #{{ cr.id }}</h3>
+                <p class="text-indigo-100 text-sm mt-1">
+                  <i class="fas fa-user mr-2"></i>
+                  {{ cr.consultation?.rendezvous?.patient?.user?.prenom }}
+                  {{ cr.consultation?.rendezvous?.patient?.user?.nom }}
+                </p>
+              </div>
+            </div>
           </div>
-          <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm font-medium">
-            {{ cr.date_creation | date:'dd/MM/yyyy' }}
-          </span>
+          <div class="text-right">
+            <div class="bg-white bg-opacity-20 px-4 py-2 rounded-full inline-block mb-2">
+              <i class="fas fa-calendar-alt mr-2"></i>
+              {{ cr.date_creation | date:'dd/MM/yyyy' }}
+            </div>
+            <p class="text-indigo-100 text-sm">
+              Consultation: {{ cr.consultation?.rendezvous?.date_rendezvous | date:'dd/MM/yyyy' }}
+            </p>
+          </div>
         </div>
       </div>
 
+      <!-- Contenu du compte rendu -->
       <div class="p-6">
-        <div class="space-y-4 mb-6">
-          <div>
-            <p class="text-sm text-gray-500 mb-2">Diagnostic</p>
-            <p class="text-gray-800 bg-gray-50 p-3 rounded-lg">{{ cr.diagnostic || 'Non renseigné' }}</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <!-- Diagnostic -->
+          <div class="bg-gradient-to-br from-green-50 to-green-100 p-5 rounded-xl border-l-4 border-green-500">
+            <div class="flex items-center mb-3">
+              <div class="bg-green-500 text-white rounded-lg p-2 mr-3">
+                <i class="fas fa-stethoscope"></i>
+              </div>
+              <h4 class="font-bold text-gray-800 text-lg">Diagnostic</h4>
+            </div>
+            <p class="text-gray-700 leading-relaxed">{{ cr.diagnostic || 'Non renseigné' }}</p>
           </div>
-          <div>
-            <p class="text-sm text-gray-500 mb-2">Traitement</p>
-            <p class="text-gray-800 bg-gray-50 p-3 rounded-lg">{{ cr.traitement || 'Non renseigné' }}</p>
-          </div>
-          <div *ngIf="cr.observation">
-            <p class="text-sm text-gray-500 mb-2">Observations</p>
-            <p class="text-gray-800 bg-gray-50 p-3 rounded-lg">{{ cr.observation }}</p>
+
+          <!-- Traitement -->
+          <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-xl border-l-4 border-blue-500">
+            <div class="flex items-center mb-3">
+              <div class="bg-blue-500 text-white rounded-lg p-2 mr-3">
+                <i class="fas fa-pills"></i>
+              </div>
+              <h4 class="font-bold text-gray-800 text-lg">Traitement</h4>
+            </div>
+            <p class="text-gray-700 leading-relaxed">{{ cr.traitement || 'Non renseigné' }}</p>
           </div>
         </div>
 
-        <div class="flex space-x-3">
-          <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-                  (click)="voirCompteRendu(cr.id)">
-            <i class="fas fa-eye"></i>
-            <span>Voir</span>
-          </button>
-          <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-                  (click)="telechargerCompteRendu(cr.id)">
-            <i class="fas fa-download"></i>
-            <span>Télécharger</span>
-          </button>
-          <button class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-                  (click)="modifierCompteRendu(cr.id)">
+        <!-- Observations -->
+        <div *ngIf="cr.observation" class="bg-gradient-to-br from-amber-50 to-amber-100 p-5 rounded-xl border-l-4 border-amber-500 mb-6">
+          <div class="flex items-center mb-3">
+            <div class="bg-amber-500 text-white rounded-lg p-2 mr-3">
+              <i class="fas fa-clipboard"></i>
+            </div>
+            <h4 class="font-bold text-gray-800 text-lg">Observations</h4>
+          </div>
+          <p class="text-gray-700 leading-relaxed">{{ cr.observation }}</p>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
+
+          <button
+            class="flex-1 bg-amber-500 hover:bg-amber-600 text-white px-4 py-3 rounded-xl flex items-center justify-center space-x-2 transition-all duration-300 shadow-md hover:shadow-lg"
+            (click)="modifierCompteRendu(cr.id)">
             <i class="fas fa-edit"></i>
             <span>Modifier</span>
+          </button>
+          <button
+            class="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-xl flex items-center justify-center space-x-2 transition-all duration-300 shadow-md hover:shadow-lg"
+            (click)="supprimerCompteRendu(cr.id)">
+            <i class="fas fa-trash"></i>
+            <span>Supprimer</span>
           </button>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Modal pour ajout/modification -->
+<div *ngIf="showModal" class="fixed inset-0 z-50 overflow-y-auto" style="animation: fadeIn 0.3s ease-out;">
+  <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+    <!-- Overlay -->
+    <div class="fixed inset-0 transition-opacity bg-gray-900 bg-opacity-75" (click)="closeModal()"></div>
+
+    <!-- Modal -->
+    <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+      <app-add-compte-rendu
+        [isEditMode]="isEditMode"
+        [compteRenduId]="selectedCompteRenduId"
+        [consultations]="consultations"
+        (onSuccess)="onModalSuccess()"
+        (onCancel)="closeModal()">
+      </app-add-compte-rendu>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+</style>

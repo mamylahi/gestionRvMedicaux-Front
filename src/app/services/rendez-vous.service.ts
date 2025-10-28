@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { RendezVous } from '../models/rendezvous.model';
 import {environment} from '../environments/environment';
+import {RendezVousStatut} from '../models/enum';
+import {Observable} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +17,7 @@ export class RendezVousService {
     return this.http.get<RendezVous[]>(this.URL);
   }
 
-  getById(id: string) {
+    getById(id: number) {
     return this.http.get<RendezVous>(`${this.URL}/${id}`);
   }
 
@@ -23,7 +25,7 @@ export class RendezVousService {
     return this.http.post<RendezVous>(this.URL, data);
   }
 
-  update(id: string, data: any) {
+  update(id: number, data: any) {
     return this.http.put<RendezVous>(`${this.URL}/${id}`, data);
   }
 
@@ -43,12 +45,16 @@ export class RendezVousService {
     return this.http.get<RendezVous[]>(`${this.URL}/date/${date}/all`);
   }
 
-  updateStatut(id: string, statut: string) {
+    updateStatut(id: number, statut: string) {
     return this.http.patch<RendezVous>(`${this.URL}/${id}/statut`, { statut });
   }
 
   // AJOUT: Méthode pour récupérer les RendezVous du patient connecté
   getMesRendezVous() {
     return this.http.get<any[]>(`${environment.apiUrl}/mes-rendezvous`);
+  }
+
+  getByStatut(statut: RendezVousStatut): Observable<RendezVous[]> {
+    return this.http.get<RendezVous[]>(`${this.URL}/statut/${statut}`);
   }
 }

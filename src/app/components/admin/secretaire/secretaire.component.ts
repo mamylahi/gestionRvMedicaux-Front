@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { SecretaireService } from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/services/secretaire.service';
-import { Secretaire } from '../../../../../../../../../OneDrive/Desktop/gestionRvMedicaux-Front/gestionRvMedicaux-Front/gestionRvMedicaux-Front/src/app/models/secretaire.model';
+import {SecretaireService} from '../../../services/secretaire.service';
+import {Secretaire} from '../../../models/secretaire.model';
 
 @Component({
   selector: 'app-secretaire',

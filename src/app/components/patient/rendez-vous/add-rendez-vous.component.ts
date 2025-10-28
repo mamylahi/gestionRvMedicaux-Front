@@ -163,4 +163,9 @@ export class AddRendezVousComponent implements OnInit {
     }
     return `Médecin #${medecin.id}`;
   }
+
+  getSelectedMedecin(): Medecin | undefined {
+    const medecinId = this.rendezVousForm.get('medecin_id')?.value;
+    return this.medecins.find(m => m.id === Number(medecinId));
+  }
 }

@@ -15,20 +15,17 @@ import { RouterModule, Routes } from '@angular/router';
  import { PatientComponent } from './components/admin/patient/patient.component';
 
 
-import { RendezVousComponent } from './components/admin/rendez-vous/rendez-vous.component';
+import { RendezvousComponent } from './components/secretaire/rendez-vous/rendez-vous.component';
  import { ConsultationComponent } from './components/admin/consultation/consultation.component';
  import { AddConsultationComponent } from './components/admin/consultation/add-consultation.component';
  import { CompteRenduComponent } from './components/admin/compte-rendu/compte-rendu.component';
  import { DisponibiliteComponent } from './components/admin/disponibilite/disponibilite.component';
- import { DossierMedicalComponent } from './components/admin/dossier-medical/dossier-medical.component';import { PaiementComponent } from './components/admin/paiement/paiement.component';
- import {AddDepartementComponent} from './components/admin/departement/add-departement.component';
- import {AddSpecialiteComponent} from './components/admin/specialite/add-specialite.component';
- import {AddMedecinComponent} from './components/admin/medecin/add-medecin.component';
- import {AddRendezVousComponent} from './components/admin/rendez-vous/add-rendez-vous.component';
- import {AddCompteRenduComponent} from './components/admin/compte-rendu/add-compte-rendu.component';
+ import { DossierMedicalComponent } from './components/secretaire/dossier-medical/dossier-medical.component';import { PaiementComponent } from './components/secretaire/paiement/paiement.component';
+ import {AddRendezVousComponent} from './components/secretaire/rendez-vous/add-rendez-vous.component';
+ import {AddCompteRenduComponent} from './components/medecin/compte-rendu/add-compte-rendu.component';
  import {AddDisponibiliteComponent} from './components/admin/disponibilite/add-disponibilite.component';
- import {AddDossierMedicalComponent} from './components/admin/dossier-medical/add-dossier-medical.component';
- import {AddPaiementComponent} from './components/admin/paiement/add-paiement.component';
+ import {AddDossierMedicalComponent} from './components/secretaire/dossier-medical/add-dossier-medical.component';
+ import {AddPaiementComponent} from './components/secretaire/paiement/add-paiement.component';
 import {DashboardComponent} from './components/dashboard/dashboard.component';
 import {UserComponent} from './components/admin/users/user.component';
 import {MedecinCompteRenduComponent} from './components/medecin/compte-rendu/compte-rendu.component';
@@ -40,38 +37,25 @@ import {PatientConsultationComponent} from './components/patient/consultation/co
 import {PatientDossierMedicalComponent} from './components/patient/dossier-medical/dossier-medical.component';
 import {PatientPaiementsComponent} from './components/patient/paiement/paiement.component';
 import {PatientRendezVousComponent} from './components/patient/rendez-vous/rendez-vous.component';
-import {SecretaireDossierMedicalComponent} from './components/secretaire/dossier-medical/dossier-medical.component';
-import {SecretairePaiementComponent} from './components/secretaire/paiement/paiement.component';
-import {SecretaireRendezVousComponent} from './components/secretaire/rendez-vous/rendez-vous.component';
+import {ProfileComponent} from './components/profile/profile.component';
 
 const routes: Routes = [
+
   // Public routes
   { path: '', component: AuthComponent },
   { path: 'login', component: AuthComponent },
-
   { path: 'users', component: UserComponent },
 
-  // Dashboard
-  // { path: 'dashboard', component: DashboardComponent },
-  //
-  // // Administration
+   // Administration
   { path: 'departements', component: DepartementComponent },
-  { path: 'departements/add', component: AddDepartementComponent },
-  { path: 'departements/edit/:id', component: AddDepartementComponent },
-
   { path: 'dashboard', component: DashboardComponent },
-
    { path: 'specialites', component: SpecialiteComponent },
-  // { path: 'specialites/add', component: AddSpecialiteComponent },
-  // { path: 'specialites/edit/:id', component: AddSpecialiteComponent },
-  //
-  // // Personnel Médical
-   { path: 'medecins', component: MedecinComponent },
-   { path: 'medecins/edit/:id', component: AddMedecinComponent },
 
+
+   // Personnel Médical
+   { path: 'medecins', component: MedecinComponent },
   { path: 'secretaires', component: SecretaireComponent },
   { path: 'secretaires/edit/:id', component: SecretaireComponent },
-
   { path: 'patients', component: PatientComponent },
   { path: 'patients/edit/:id', component: PatientComponent },
 
@@ -87,15 +71,28 @@ const routes: Routes = [
   { path: 'mes-med-consultations', component: MedecinConsultationComponent },
   { path: 'dossier-med-medicaux', component: MedecinDossierMedicalComponent },
   { path: 'compte-med-rendus', component: MedecinCompteRenduComponent },
+  {path: 'medecin/compte-rendu/add', component: AddCompteRenduComponent, data: { title: 'Nouveau Compte Rendu' }},
+  {path: 'medecin/compte-rendu/edit/:id', component: AddCompteRenduComponent, data: { title: 'Modifier Compte Rendu' }},
 
-  // Nouvelles routes pour les données du secretaire connecté
-  { path: 'mes-sec-rendezvous', component: SecretaireRendezVousComponent },
-  { path: 'sec-paiements', component: SecretairePaiementComponent },
-  { path: 'sec-dossier-medicaux', component: SecretaireDossierMedicalComponent },
+  // // Voir les détails d'un compte rendu (optionnel)
+  // {
+  //   path: 'medecin/comptes-rendus/:id',
+  //   component: MedecinCompteRenduComponent, // ou un composant de détails dédié
+  //   data: { title: 'Détails Compte Rendu' }
+  // }
+
+
+
+  // // Nouvelles routes pour les données du secretaire connecté
+  // { path: 'mes-sec-rendezvous', component: SecretaireRendezVousComponent },
+  // { path: 'rendez-vous/add', component: AddRendezVousComponent},
+  // { path: 'rendez-vous/edit/:id', component: AddRendezVousComponent},
+  // { path: 'sec-paiements', component: SecretairePaiementComponent },
+  // { path: 'sec-dossier-medicaux', component: SecretaireDossierMedicalComponent },
 
 
   // Gestion des Consultations
-  { path: 'rendez-vous', component: RendezVousComponent },
+  { path: 'rendez-vous', component: RendezvousComponent },
   { path: 'rendez-vous/add', component: AddRendezVousComponent },
   { path: 'rendez-vous/edit/:id', component: AddRendezVousComponent },
 
@@ -119,6 +116,9 @@ const routes: Routes = [
   { path: 'paiements', component: PaiementComponent },
   { path: 'paiements/add', component: AddPaiementComponent },
   { path: 'paiements/edit/:id', component: AddPaiementComponent },
+
+
+  { path: 'profile', component: ProfileComponent },
 
   // 404 - Page not found
   { path: '**', redirectTo: '/dashboard' }

@@ -1,125 +1,231 @@
-<div class="container-fluid p-4">
-  <div class="row justify-content-center">
-    <div class="col-lg-8">
-      <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
-          <h4 class="mb-0">
-            <i class="fas fa-file-medical me-2"></i>
-            {{ isEditMode ? 'Modifier' : 'Nouveau' }} Compte Rendu
-          </h4>
+<div class="bg-white">
+  <!-- En-tête du modal -->
+  <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-5">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="bg-white bg-opacity-20 rounded-lg p-2">
+          <i class="fas fa-file-medical text-white text-2xl"></i>
         </div>
-
-        <div class="card-body">
-          <!-- Message d'erreur -->
-          <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show">
-            <i class="fas fa-exclamation-circle me-2"></i>{{ errorMessage }}
-            <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
-          </div>
-
-          <!-- Message de succès -->
-          <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show">
-            <i class="fas fa-check-circle me-2"></i>{{ successMessage }}
-            <button type="button" class="btn-close" (click)="successMessage = ''"></button>
-          </div>
-
-          <form [formGroup]="compteRenduForm" (ngSubmit)="onSubmit()">
-            <div class="row g-3">
-              <!-- Consultation ID -->
-              <div class="col-md-6">
-                <label class="form-label">
-                  Consultation <span class="text-danger">*</span>
-                </label>
-                <input
-                  type="number"
-                  class="form-control"
-                  formControlName="consultation_id"
-                  [class.is-invalid]="isFieldInvalid('consultation_id')"
-                  placeholder="ID de la consultation">
-                <div class="invalid-feedback" *ngIf="isFieldInvalid('consultation_id')">
-                  {{ getErrorMessage('consultation_id') }}
-                </div>
-              </div>
-
-              <!-- Date Création -->
-              <div class="col-md-6">
-                <label class="form-label">
-                  Date de création <span class="text-danger">*</span>
-                </label>
-                <input
-                  type="date"
-                  class="form-control"
-                  formControlName="date_creation"
-                  [class.is-invalid]="isFieldInvalid('date_creation')">
-                <div class="invalid-feedback" *ngIf="isFieldInvalid('date_creation')">
-                  {{ getErrorMessage('date_creation') }}
-                </div>
-              </div>
-
-              <!-- Diagnostic -->
-              <div class="col-12">
-                <label class="form-label">
-                  Diagnostic <span class="text-danger">*</span>
-                </label>
-                <textarea
-                  class="form-control"
-                  formControlName="diagnostic"
-                  [class.is-invalid]="isFieldInvalid('diagnostic')"
-                  rows="4"
-                  placeholder="Saisir le diagnostic..."></textarea>
-                <div class="invalid-feedback" *ngIf="isFieldInvalid('diagnostic')">
-                  {{ getErrorMessage('diagnostic') }}
-                </div>
-              </div>
-
-              <!-- Traitement -->
-              <div class="col-12">
-                <label class="form-label">
-                  Traitement <span class="text-danger">*</span>
-                </label>
-                <textarea
-                  class="form-control"
-                  formControlName="traitement"
-                  [class.is-invalid]="isFieldInvalid('traitement')"
-                  rows="4"
-                  placeholder="Saisir le traitement prescrit..."></textarea>
-                <div class="invalid-feedback" *ngIf="isFieldInvalid('traitement')">
-                  {{ getErrorMessage('traitement') }}
-                </div>
-              </div>
-
-              <!-- Observation -->
-              <div class="col-12">
-                <label class="form-label">
-                  Observation <span class="text-muted">(optionnel)</span>
-                </label>
-                <textarea
-                  class="form-control"
-                  formControlName="observation"
-                  rows="3"
-                  placeholder="Observations complémentaires..."></textarea>
-              </div>
-            </div>
-
-            <div class="d-flex justify-content-end gap-2 mt-4">
-              <button
-                type="button"
-                class="btn btn-secondary"
-                (click)="onCancel()"
-                [disabled]="isSubmitting">
-                <i class="fas fa-times me-1"></i>Annuler
-              </button>
-              <button
-                type="submit"
-                class="btn btn-primary"
-                [disabled]="isSubmitting || compteRenduForm.invalid">
-                <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-1"></span>
-                <i *ngIf="!isSubmitting" class="fas fa-save me-1"></i>
-                {{ isEditMode ? 'Modifier' : 'Créer' }}
-              </button>
-            </div>
-          </form>
+        <div>
+          <h2 class="text-2xl font-bold text-white">
+            {{ isEditMode ? 'Modifier le compte rendu' : 'Nouveau compte rendu' }}
+          </h2>
+          <p class="text-indigo-100 text-sm">
+            {{ isEditMode ? 'Mettez à jour les informations' : 'Créez un nouveau compte rendu médical' }}
+          </p>
         </div>
+      </div>
+      <button
+        type="button"
+        (click)="handleCancel()"
+        class="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-2 transition-colors">
+        <i class="fas fa-times text-xl"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages d'alerte -->
+  <div class="px-6 pt-4">
+    <div *ngIf="errorMessage" class="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg mb-4 animate-slide-down">
+      <div class="flex items-center">
+        <i class="fas fa-exclamation-circle mr-2"></i>
+        <span>{{ errorMessage }}</span>
+      </div>
+    </div>
+
+    <div *ngIf="successMessage" class="bg-green-50 border-l-4 border-green-500 text-green-700 px-4 py-3 rounded-lg mb-4 animate-slide-down">
+      <div class="flex items-center">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span>{{ successMessage }}</span>
       </div>
     </div>
   </div>
+
+  <!-- Formulaire -->
+  <form [formGroup]="compteRenduForm" (ngSubmit)="onSubmit()" class="px-6 pb-6">
+    <div class="max-h-[calc(100vh-250px)] overflow-y-auto pr-2">
+
+      <!-- Section Consultation -->
+      <div class="mb-6">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">
+          <i class="fas fa-stethoscope text-indigo-600 mr-2"></i>
+          Consultation <span class="text-red-500">*</span>
+        </label>
+        <select
+          formControlName="consultation_id"
+          (change)="onConsultationChange($any($event.target).value)"
+          [disabled]="isEditMode"
+          [class.border-red-500]="isFieldInvalid('consultation_id')"
+          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+          <option value="">Sélectionner une consultation...</option>
+          <option *ngFor="let c of consultations" [value]="c.id">
+            {{ c.rendezvous?.patient?.user?.prenom }} {{ c.rendezvous?.patient?.user?.nom }} -
+            {{ c.rendezvous?.date_heure | date:'dd/MM/yyyy HH:mm' }}
+          </option>
+        </select>
+        <p *ngIf="isFieldInvalid('consultation_id')" class="text-red-500 text-sm mt-1">
+          {{ getErrorMessage('consultation_id') }}
+        </p>
+      </div>
+
+      <!-- Info consultation sélectionnée -->
+      <div *ngIf="selectedConsultation" class="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-200 rounded-xl p-4 mb-6">
+        <div class="flex items-start space-x-4">
+          <div class="bg-indigo-500 text-white rounded-lg p-3 flex-shrink-0">
+            <i class="fas fa-user text-2xl"></i>
+          </div>
+          <div class="flex-1">
+            <h4 class="font-bold text-gray-800 text-lg mb-2">
+              {{ selectedConsultation.rendezvous?.patient?.user?.prenom }}
+              {{ selectedConsultation.rendezvous?.patient?.user?.nom }}
+            </h4>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <span class="text-gray-600">Date:</span>
+                <span class="font-semibold text-gray-800 ml-2">
+                  {{ selectedConsultation.rendezvous?.date_heure | date:'dd/MM/yyyy HH:mm' }}
+                </span>
+              </div>
+              <div *ngIf="selectedConsultation.motif">
+                <span class="text-gray-600">Motif:</span>
+                <span class="font-semibold text-gray-800 ml-2">{{ selectedConsultation.motif }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Date de création -->
+      <div class="mb-6">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">
+          <i class="fas fa-calendar-alt text-indigo-600 mr-2"></i>
+          Date de création <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="date"
+          formControlName="date_creation"
+          [class.border-red-500]="isFieldInvalid('date_creation')"
+          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+        <p *ngIf="isFieldInvalid('date_creation')" class="text-red-500 text-sm mt-1">
+          {{ getErrorMessage('date_creation') }}
+        </p>
+      </div>
+
+      <!-- Diagnostic -->
+      <div class="mb-6">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">
+          <i class="fas fa-diagnoses text-green-600 mr-2"></i>
+          Diagnostic médical <span class="text-red-500">*</span>
+        </label>
+        <textarea
+          formControlName="diagnostic"
+          rows="4"
+          [class.border-red-500]="isFieldInvalid('diagnostic')"
+          placeholder="Décrire le diagnostic complet du patient..."
+          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all resize-none"></textarea>
+        <div class="flex justify-between items-center mt-1">
+          <p *ngIf="isFieldInvalid('diagnostic')" class="text-red-500 text-sm">
+            {{ getErrorMessage('diagnostic') }}
+          </p>
+          <p class="text-gray-500 text-xs italic">
+            💡 Ex: Grippe saisonnière avec syndrome fébrile
+          </p>
+        </div>
+      </div>
+
+      <!-- Traitement -->
+      <div class="mb-6">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">
+          <i class="fas fa-pills text-blue-600 mr-2"></i>
+          Traitement prescrit <span class="text-red-500">*</span>
+        </label>
+        <textarea
+          formControlName="traitement"
+          rows="4"
+          [class.border-red-500]="isFieldInvalid('traitement')"
+          placeholder="Prescrire le traitement détaillé..."
+          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"></textarea>
+        <div class="flex justify-between items-center mt-1">
+          <p *ngIf="isFieldInvalid('traitement')" class="text-red-500 text-sm">
+            {{ getErrorMessage('traitement') }}
+          </p>
+          <p class="text-gray-500 text-xs italic">
+            💡 Ex: Paracétamol 1g 3x/jour pendant 5 jours
+          </p>
+        </div>
+      </div>
+
+      <!-- Observations -->
+      <div class="mb-6">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">
+          <i class="fas fa-clipboard-list text-amber-600 mr-2"></i>
+          Observations complémentaires <span class="text-gray-400 text-xs">(optionnel)</span>
+        </label>
+        <textarea
+          formControlName="observation"
+          rows="3"
+          placeholder="Ajouter des observations supplémentaires, recommandations de suivi..."
+          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all resize-none"></textarea>
+        <p class="text-gray-500 text-xs italic mt-1">
+          💡 Ex: Rendez-vous de contrôle recommandé dans 7 jours
+        </p>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 mt-6">
+      <button
+        type="button"
+        (click)="handleCancel()"
+        [disabled]="isSubmitting"
+        class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+        <i class="fas fa-times mr-2"></i>
+        Annuler
+      </button>
+      <button
+        type="submit"
+        [disabled]="isSubmitting || compteRenduForm.invalid"
+        class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-medium transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed">
+        <i *ngIf="isSubmitting" class="fas fa-spinner fa-spin mr-2"></i>
+        <i *ngIf="!isSubmitting" class="fas fa-save mr-2"></i>
+        {{ isSubmitting ? 'Enregistrement...' : (isEditMode ? 'Modifier' : 'Créer') }}
+      </button>
+    </div>
+  </form>
 </div>
+
+<style>
+  @keyframes slide-down {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slide-down {
+    animation: slide-down 0.3s ease-out;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #c7d2fe;
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a5b4fc;
+  }
+</style>

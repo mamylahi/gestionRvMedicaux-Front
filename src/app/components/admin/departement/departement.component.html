@@ -11,10 +11,25 @@
       </div>
       <button
         class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center"
-        (click)="onAdd()">
+        (click)="openAddModal()">
         <i class="fas fa-plus mr-2"></i>
         Nouveau Département
       </button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="successMessage" class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+    <div class="flex items-center">
+      <i class="fas fa-check-circle text-green-500 mr-3"></i>
+      <p class="text-green-700">{{ successMessage }}</p>
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+    <div class="flex items-center">
+      <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+      <p class="text-red-700">{{ errorMessage }}</p>
     </div>
   </div>
 
@@ -120,24 +135,7 @@
           <i class="fas fa-redo mr-2"></i>
           Réinitialiser
         </button>
-        <button
-          class="flex-1 lg:flex-none px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center justify-center"
-          title="Exporter la liste">
-          <i class="fas fa-download mr-2"></i>
-          Exporter
-        </button>
       </div>
-    </div>
-  </div>
-
-  <!-- Message d'erreur -->
-  <div *ngIf="errorMessage" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-    <div class="flex items-center">
-      <i class="fas fa-exclamation-triangle text-red-500 mr-3 text-lg"></i>
-      <p class="text-red-700 flex-1">{{ errorMessage }}</p>
-      <button class="text-red-500 hover:text-red-700 transition-colors" (click)="errorMessage = ''">
-        <i class="fas fa-times text-lg"></i>
-      </button>
     </div>
   </div>
 
@@ -247,32 +245,24 @@
 
       <!-- Pied de carte avec actions -->
       <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
-        <div class="flex justify-between items-center">
-          <!-- Dernière mise à jour -->
-          <div class="text-sm text-gray-500 flex items-center">
-            <i class="fas fa-clock mr-2"></i>
-            Créé le {{ getCreationDate(dept) }}
-          </div>
-
+        <div class="flex justify-end items-center">
           <!-- Actions -->
-          <div class="flex space-x-1">
+          <div class="flex space-x-2">
             <button
-              class="w-8 h-8 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg flex items-center justify-center transition-colors"
-              (click)="onView(dept.id)"
-              title="Voir les détails">
-              <i class="fas fa-eye text-sm"></i>
-            </button>
-            <button
-              class="w-8 h-8 bg-yellow-100 hover:bg-yellow-200 text-yellow-600 rounded-lg flex items-center justify-center transition-colors"
+              class="flex items-center justify-center w-9 h-9 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-all duration-200 hover:shadow-md"
               (click)="onEdit(dept.id)"
-              title="Modifier">
-              <i class="fas fa-edit text-sm"></i>
+              title="Modifier le département">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+              </svg>
             </button>
             <button
-              class="w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition-colors"
+              class="flex items-center justify-center w-9 h-9 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-all duration-200 hover:shadow-md"
               (click)="onDelete(dept.id)"
-              title="Supprimer">
-              <i class="fas fa-trash text-sm"></i>
+              title="Supprimer le département">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
             </button>
           </div>
         </div>
@@ -296,7 +286,7 @@
         <button
           *ngIf="!searchTerm"
           class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-flex items-center justify-center"
-          (click)="onAdd()">
+          (click)="openAddModal()">
           <i class="fas fa-plus mr-2"></i>
           Ajouter le premier département
         </button>
@@ -327,6 +317,128 @@
         <div class="text-xs text-gray-500">
           Mis à jour à {{ getCurrentTime() }}
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Ajout/Modification Département -->
+  <div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div class="p-6 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900">
+          <i class="fas fa-building mr-2 text-blue-600"></i>
+          {{ isEditing ? 'Modifier le département' : 'Nouveau département' }}
+        </h3>
+      </div>
+
+      <form (ngSubmit)="saveDepartement()" class="p-6 space-y-4">
+        <!-- Nom du département -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            <i class="fas fa-tag text-blue-600 mr-1"></i>
+            Nom du département *
+          </label>
+          <input
+            type="text"
+            [(ngModel)]="newDepartement.nom"
+            name="nom"
+            required
+            maxlength="100"
+            placeholder="Ex: Cardiologie, Pédiatrie, Médecine Générale..."
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+          <small class="text-xs text-gray-500 mt-1 block">
+            {{ getCharCount('nom') }} / 100 caractères (minimum 3)
+          </small>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            <i class="fas fa-align-left text-blue-600 mr-1"></i>
+            Description <span class="text-gray-500">(optionnel)</span>
+          </label>
+          <textarea
+            [(ngModel)]="newDepartement.description"
+            name="description"
+            rows="4"
+            maxlength="500"
+            placeholder="Description détaillée du département..."
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"></textarea>
+          <small class="text-xs text-gray-500 mt-1 block">
+            {{ getCharCount('description') }} / 500 caractères
+          </small>
+        </div>
+
+        <!-- Résumé -->
+        <div *ngIf="newDepartement.nom" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h6 class="text-sm font-semibold text-blue-900 mb-2">
+            <i class="fas fa-info-circle mr-1"></i>
+            Résumé
+          </h6>
+          <p class="text-sm text-blue-800">
+            <strong>Nom:</strong> {{ newDepartement.nom }}
+            <br *ngIf="newDepartement.description">
+            <strong *ngIf="newDepartement.description">Description:</strong>
+            <span *ngIf="newDepartement.description">{{ newDepartement.description }}</span>
+          </p>
+        </div>
+
+        <!-- Message d'erreur dans le modal -->
+        <div *ngIf="errorMessage" class="bg-red-50 border border-red-200 rounded-lg p-3">
+          <p class="text-red-700 text-sm">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            {{ errorMessage }}
+          </p>
+        </div>
+
+        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+          <button
+            type="button"
+            (click)="closeModal()"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <i class="fas fa-times mr-2"></i>
+            Annuler
+          </button>
+          <button
+            type="submit"
+            [disabled]="isLoading"
+            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            <span *ngIf="isLoading" class="flex items-center">
+              <i class="fas fa-spinner fa-spin mr-2"></i>
+              {{ isEditing ? 'Modification...' : 'Création...' }}
+            </span>
+            <span *ngIf="!isLoading">
+              <i class="fas fa-save mr-2"></i>
+              {{ isEditing ? 'Modifier' : 'Créer' }}
+            </span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Aide -->
+      <div class="bg-gray-50 p-6 border-t border-gray-200">
+        <h6 class="text-sm font-semibold text-gray-700 mb-2">
+          <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+          Conseils utiles
+        </h6>
+        <ul class="text-xs text-gray-600 space-y-1">
+          <li class="flex items-start">
+            <i class="fas fa-check text-green-500 mr-2 mt-0.5"></i>
+            Les champs marqués d'un <span class="text-red-600 font-bold mx-1">*</span> sont obligatoires
+          </li>
+          <li class="flex items-start">
+            <i class="fas fa-check text-green-500 mr-2 mt-0.5"></i>
+            Choisissez un nom court et explicite (minimum 3 caractères)
+          </li>
+          <li class="flex items-start">
+            <i class="fas fa-check text-green-500 mr-2 mt-0.5"></i>
+            La description aide à identifier rapidement le département
+          </li>
+          <li class="flex items-start">
+            <i class="fas fa-check text-green-500 mr-2 mt-0.5"></i>
+            Vérifiez qu'un département similaire n'existe pas déjà
+          </li>
+        </ul>
       </div>
     </div>
   </div>
