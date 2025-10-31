@@ -63,4 +63,6 @@ export class PatientService {
   getMonDossierMedical() {
     return this.http.get<any>(`${this.URL}/mon-dossier-medical`);
   }
+
+
 }

@@ -1,10 +1,14 @@
+// specialite.component.ts
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, formatDate } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {Specialite} from '../../../models/specialite.model';
-import {SpecialiteService} from '../../../services/specialite.service';
-import {DepartementService} from '../../../services/departement.service';
+import { Specialite } from '../../../models/specialite.model';
+import { SpecialiteService } from '../../../services/specialite.service';
+import { DepartementService } from '../../../services/departement.service';
+
+// Déclaration pour SweetAlert2
+declare var Swal: any;
 
 @Component({
   selector: 'app-specialite',
@@ -25,6 +29,11 @@ export class SpecialiteComponent implements OnInit {
   successMessage: string = '';
   departements: any[] = [];
   isLoadingDepartements: boolean = false;
+
+  // Pagination
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  totalPages: number = 1;
 
   // Modal
   showModal: boolean = false;
@@ -61,7 +70,8 @@ export class SpecialiteComponent implements OnInit {
         } else {
           this.specialites = [];
         }
-        this.filteredSpecialites = this.specialites;
+        this.filteredSpecialites = [...this.specialites];
+        this.calculateTotalPages();
         this.isLoading = false;
       },
       error: (error: any) => {
@@ -113,12 +123,42 @@ export class SpecialiteComponent implements OnInit {
     }
 
     this.filteredSpecialites = filtered;
+    this.currentPage = 1;
+    this.calculateTotalPages();
   }
 
   onResetFilters(): void {
     this.searchTerm = '';
     this.selectedDepartement = '';
-    this.filteredSpecialites = this.specialites;
+    this.filteredSpecialites = [...this.specialites];
+    this.currentPage = 1;
+    this.calculateTotalPages();
+  }
+
+  calculateTotalPages(): void {
+    this.totalPages = Math.ceil(this.filteredSpecialites.length / this.itemsPerPage);
+  }
+
+  get paginatedSpecialites(): Specialite[] {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    return this.filteredSpecialites.slice(startIndex, startIndex + this.itemsPerPage);
+  }
+
+  getDisplayedPages(): number[] {
+    const pages = [];
+    const startPage = Math.max(1, this.currentPage - 2);
+    const endPage = Math.min(this.totalPages, this.currentPage + 2);
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
   }
 
   // Gestion du modal
@@ -151,7 +191,20 @@ export class SpecialiteComponent implements OnInit {
 
   saveSpecialite(): void {
     if (!this.newSpecialite.nom || !this.newSpecialite.departement_id) {
-      this.errorMessage = 'Veuillez remplir tous les champs obligatoires';
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          title: 'Champs manquants',
+          text: 'Veuillez remplir tous les champs obligatoires',
+          icon: 'warning',
+          confirmButtonColor: '#3B82F6',
+          customClass: {
+            popup: 'rounded-2xl',
+            confirmButton: 'rounded-xl px-6 py-3 font-semibold'
+          }
+        });
+      } else {
+        this.errorMessage = 'Veuillez remplir tous les champs obligatoires';
+      }
       return;
     }
 
@@ -168,14 +221,40 @@ export class SpecialiteComponent implements OnInit {
 
     this.specialiteService.create(this.newSpecialite).subscribe({
       next: () => {
-        this.successMessage = 'Spécialité créée avec succès';
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Succès !',
+            text: 'Spécialité créée avec succès',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false,
+            customClass: {
+              popup: 'rounded-2xl'
+            }
+          });
+        } else {
+          this.successMessage = 'Spécialité créée avec succès';
+          setTimeout(() => this.successMessage = '', 3000);
+        }
         this.closeModal();
         this.loadSpecialites();
         this.isLoading = false;
-        setTimeout(() => this.successMessage = '', 3000);
       },
       error: (error: any) => {
-        this.errorMessage = 'Erreur lors de la création de la spécialité';
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Erreur',
+            text: 'Une erreur est survenue lors de la création',
+            icon: 'error',
+            confirmButtonColor: '#3B82F6',
+            customClass: {
+              popup: 'rounded-2xl',
+              confirmButton: 'rounded-xl px-6 py-3 font-semibold'
+            }
+          });
+        } else {
+          this.errorMessage = 'Erreur lors de la création de la spécialité';
+        }
         this.isLoading = false;
         console.error('Erreur:', error);
       }
@@ -190,14 +269,40 @@ export class SpecialiteComponent implements OnInit {
 
     this.specialiteService.update(this.selectedSpecialite.id, this.newSpecialite).subscribe({
       next: () => {
-        this.successMessage = 'Spécialité modifiée avec succès';
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Succès !',
+            text: 'Spécialité modifiée avec succès',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false,
+            customClass: {
+              popup: 'rounded-2xl'
+            }
+          });
+        } else {
+          this.successMessage = 'Spécialité modifiée avec succès';
+          setTimeout(() => this.successMessage = '', 3000);
+        }
         this.closeModal();
         this.loadSpecialites();
         this.isLoading = false;
-        setTimeout(() => this.successMessage = '', 3000);
       },
       error: (error: any) => {
-        this.errorMessage = 'Erreur lors de la modification de la spécialité';
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Erreur',
+            text: 'Une erreur est survenue lors de la modification',
+            icon: 'error',
+            confirmButtonColor: '#3B82F6',
+            customClass: {
+              popup: 'rounded-2xl',
+              confirmButton: 'rounded-xl px-6 py-3 font-semibold'
+            }
+          });
+        } else {
+          this.errorMessage = 'Erreur lors de la modification de la spécialité';
+        }
         this.isLoading = false;
         console.error('Erreur:', error);
       }
@@ -216,18 +321,70 @@ export class SpecialiteComponent implements OnInit {
   }
 
   onDelete(id: number): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette spécialité ?')) {
-      this.specialiteService.delete(id).subscribe({
-        next: () => {
-          this.successMessage = 'Spécialité supprimée avec succès';
-          this.loadSpecialites();
-          setTimeout(() => this.successMessage = '', 3000);
-        },
-        error: (error: any) => {
-          this.errorMessage = 'Erreur lors de la suppression';
-          console.error('Erreur:', error);
+    const specialite = this.specialites.find(s => s.id === id);
+    const specialiteName = specialite?.nom || 'cette spécialité';
+
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        title: 'Confirmer la suppression',
+        html: `Êtes-vous sûr de vouloir supprimer <strong>${specialiteName}</strong> ?<br><small class="text-gray-500">Cette action est irréversible</small>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#EF4444',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: 'Oui, supprimer',
+        cancelButtonText: 'Annuler',
+        customClass: {
+          popup: 'rounded-2xl',
+          confirmButton: 'rounded-xl px-6 py-3 font-semibold',
+          cancelButton: 'rounded-xl px-6 py-3 font-semibold'
+        }
+      }).then((result: { isConfirmed: any; }) => {
+        if (result.isConfirmed) {
+          this.specialiteService.delete(id).subscribe({
+            next: () => {
+              Swal.fire({
+                title: 'Supprimé !',
+                text: 'La spécialité a été supprimée avec succès',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false,
+                customClass: {
+                  popup: 'rounded-2xl'
+                }
+              });
+              this.loadSpecialites();
+            },
+            error: (error: any) => {
+              Swal.fire({
+                title: 'Erreur',
+                text: 'Une erreur est survenue lors de la suppression',
+                icon: 'error',
+                confirmButtonColor: '#3B82F6',
+                customClass: {
+                  popup: 'rounded-2xl',
+                  confirmButton: 'rounded-xl px-6 py-3 font-semibold'
+                }
+              });
+              console.error('Erreur:', error);
+            }
+          });
         }
       });
+    } else {
+      if (confirm(`Êtes-vous sûr de vouloir supprimer ${specialiteName} ?`)) {
+        this.specialiteService.delete(id).subscribe({
+          next: () => {
+            this.successMessage = 'Spécialité supprimée avec succès';
+            this.loadSpecialites();
+            setTimeout(() => this.successMessage = '', 3000);
+          },
+          error: (error: any) => {
+            this.errorMessage = 'Erreur lors de la suppression';
+            console.error('Erreur:', error);
+          }
+        });
+      }
     }
   }
 
@@ -253,41 +410,23 @@ export class SpecialiteComponent implements OnInit {
     return dept?.nom || '';
   }
 
-  getSpecialiteIcon(nom: string): string {
-    const icons: { [key: string]: string } = {
-      'Cardiologie': 'fa-heartbeat',
-      'Pédiatrie': 'fa-baby',
-      'Neurologie': 'fa-brain',
-      'Orthopédie': 'fa-bone',
-      'Dermatologie': 'fa-hand-sparkles',
-      'Ophtalmologie': 'fa-eye',
-      'Gynécologie': 'fa-venus',
-      'Radiologie': 'fa-x-ray',
-      'Chirurgie': 'fa-cut',
-      'Médecine générale': 'fa-stethoscope',
-      'Urgences': 'fa-ambulance',
-      'Psychiatrie': 'fa-brain',
-      'Anesthésie': 'fa-syringe',
-      'Oncologie': 'fa-plus-square',
-      'Rhumatologie': 'fa-bone',
-      'Urologie': 'fa-procedures'
-    };
-
-    if (!nom) return 'fa-briefcase-medical';
-
-    for (const [key, icon] of Object.entries(icons)) {
-      if (nom.toLowerCase().includes(key.toLowerCase())) {
-        return icon;
-      }
-    }
-
-    return 'fa-briefcase-medical';
-  }
-
   getCreationDate(specialite: Specialite): string {
     return specialite.created_at ?
       new Date(specialite.created_at).toLocaleDateString('fr-FR') :
       'Date inconnue';
+  }
+
+  formatDateFr(date: Date, format: string): string {
+    if (!date) {
+      return format.includes('HH') ? '--:--' : 'Date inconnue';
+    }
+
+    try {
+      return formatDate(date, format, 'fr-FR');
+    } catch (error) {
+      console.error('Erreur de formatage de date:', error);
+      return format.includes('HH') ? '--:--' : 'Date invalide';
+    }
   }
 
   getCurrentTime(): string {
@@ -301,4 +440,6 @@ export class SpecialiteComponent implements OnInit {
     const uniqueDeptIds = new Set(this.specialites.map(s => s.departement_id).filter(id => id));
     return uniqueDeptIds.size;
   }
+
+  protected readonly Math = Math;
 }

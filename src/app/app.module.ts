@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import {LOCALE_ID, NgModule} from '@angular/core';
 import {BrowserModule, provideClientHydration} from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -23,7 +23,6 @@ import {PatientRendezVousComponent} from './components/patient/rendez-vous/rende
 import {ProfileComponent} from './components/profile/profile.component';
 import {RendezvousComponent} from './components/secretaire/rendez-vous/rendez-vous.component';
 import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -39,7 +38,6 @@ import {FormsModule} from '@angular/forms';
     AppRoutingModule,
     HttpClientModule,
     CommonModule,
-    FormsModule,
     AddConsultationComponent,
     ConsultationComponent,
     DepartementComponent,
@@ -64,6 +62,8 @@ import {FormsModule} from '@angular/forms';
   ],
   providers: [
     provideClientHydration(),
+    { provide: LOCALE_ID, useValue: 'fr-FR' },
+
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,

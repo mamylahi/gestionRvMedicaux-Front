@@ -1,10 +1,14 @@
+// departement.component.ts (reste identique, juste la méthode getTruncatedDescription à ajouter)
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, formatDate } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {Departement} from '../../../models/departement.model';
-import {DepartementService} from '../../../services/departement.service';
-import {SpecialiteService} from '../../../services/specialite.service';
+import { Departement } from '../../../models/departement.model';
+import { DepartementService } from '../../../services/departement.service';
+import { SpecialiteService } from '../../../services/specialite.service';
+
+// Déclaration pour SweetAlert2
+declare var Swal: any;
 
 @Component({
   selector: 'app-departement',
@@ -23,6 +27,11 @@ export class DepartementComponent implements OnInit {
   errorMessage: string = '';
   successMessage: string = '';
   specialites: any[] = [];
+
+  // Pagination
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  totalPages: number = 1;
 
   // Modal
   showModal: boolean = false;
@@ -59,7 +68,8 @@ export class DepartementComponent implements OnInit {
         } else {
           this.departements = [];
         }
-        this.filteredDepartements = this.departements;
+        this.filteredDepartements = [...this.departements];
+        this.calculateTotalPages();
         this.isLoading = false;
       },
       error: (error: any) => {
@@ -87,7 +97,9 @@ export class DepartementComponent implements OnInit {
 
   onSearch(): void {
     if (!this.searchTerm.trim()) {
-      this.filteredDepartements = this.departements;
+      this.filteredDepartements = [...this.departements];
+      this.currentPage = 1;
+      this.calculateTotalPages();
       return;
     }
 
@@ -96,11 +108,41 @@ export class DepartementComponent implements OnInit {
       dept.nom?.toLowerCase().includes(term) ||
       dept.description?.toLowerCase().includes(term)
     );
+    this.currentPage = 1;
+    this.calculateTotalPages();
   }
 
   onResetFilters(): void {
     this.searchTerm = '';
-    this.filteredDepartements = this.departements;
+    this.filteredDepartements = [...this.departements];
+    this.currentPage = 1;
+    this.calculateTotalPages();
+  }
+
+  calculateTotalPages(): void {
+    this.totalPages = Math.ceil(this.filteredDepartements.length / this.itemsPerPage);
+  }
+
+  get paginatedDepartements(): Departement[] {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    return this.filteredDepartements.slice(startIndex, startIndex + this.itemsPerPage);
+  }
+
+  getDisplayedPages(): number[] {
+    const pages = [];
+    const startPage = Math.max(1, this.currentPage - 2);
+    const endPage = Math.min(this.totalPages, this.currentPage + 2);
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
   }
 
   // Gestion du modal
@@ -133,7 +175,20 @@ export class DepartementComponent implements OnInit {
 
   saveDepartement(): void {
     if (!this.newDepartement.nom || this.newDepartement.nom.length < 3) {
-      this.errorMessage = 'Le nom du département est obligatoire (minimum 3 caractères)';
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          title: 'Champ invalide',
+          text: 'Le nom du département est obligatoire (minimum 3 caractères)',
+          icon: 'warning',
+          confirmButtonColor: '#3B82F6',
+          customClass: {
+            popup: 'rounded-2xl',
+            confirmButton: 'rounded-xl px-6 py-3 font-semibold'
+          }
+        });
+      } else {
+        this.errorMessage = 'Le nom du département est obligatoire (minimum 3 caractères)';
+      }
       return;
     }
 
@@ -150,14 +205,40 @@ export class DepartementComponent implements OnInit {
 
     this.departementService.create(this.newDepartement).subscribe({
       next: () => {
-        this.successMessage = 'Département créé avec succès';
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Succès !',
+            text: 'Département créé avec succès',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false,
+            customClass: {
+              popup: 'rounded-2xl'
+            }
+          });
+        } else {
+          this.successMessage = 'Département créé avec succès';
+          setTimeout(() => this.successMessage = '', 3000);
+        }
         this.closeModal();
         this.loadDepartements();
         this.isLoading = false;
-        setTimeout(() => this.successMessage = '', 3000);
       },
       error: (error: any) => {
-        this.errorMessage = 'Erreur lors de la création du département';
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Erreur',
+            text: 'Une erreur est survenue lors de la création',
+            icon: 'error',
+            confirmButtonColor: '#3B82F6',
+            customClass: {
+              popup: 'rounded-2xl',
+              confirmButton: 'rounded-xl px-6 py-3 font-semibold'
+            }
+          });
+        } else {
+          this.errorMessage = 'Erreur lors de la création du département';
+        }
         this.isLoading = false;
         console.error('Erreur:', error);
       }
@@ -172,14 +253,40 @@ export class DepartementComponent implements OnInit {
 
     this.departementService.update(this.selectedDepartement.id, this.newDepartement).subscribe({
       next: () => {
-        this.successMessage = 'Département modifié avec succès';
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Succès !',
+            text: 'Département modifié avec succès',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false,
+            customClass: {
+              popup: 'rounded-2xl'
+            }
+          });
+        } else {
+          this.successMessage = 'Département modifié avec succès';
+          setTimeout(() => this.successMessage = '', 3000);
+        }
         this.closeModal();
         this.loadDepartements();
         this.isLoading = false;
-        setTimeout(() => this.successMessage = '', 3000);
       },
       error: (error: any) => {
-        this.errorMessage = 'Erreur lors de la modification du département';
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Erreur',
+            text: 'Une erreur est survenue lors de la modification',
+            icon: 'error',
+            confirmButtonColor: '#3B82F6',
+            customClass: {
+              popup: 'rounded-2xl',
+              confirmButton: 'rounded-xl px-6 py-3 font-semibold'
+            }
+          });
+        } else {
+          this.errorMessage = 'Erreur lors de la modification du département';
+        }
         this.isLoading = false;
         console.error('Erreur:', error);
       }
@@ -198,18 +305,70 @@ export class DepartementComponent implements OnInit {
   }
 
   onDelete(id: number): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce département ?')) {
-      this.departementService.delete(id).subscribe({
-        next: () => {
-          this.successMessage = 'Département supprimé avec succès';
-          this.loadDepartements();
-          setTimeout(() => this.successMessage = '', 3000);
-        },
-        error: (error: any) => {
-          this.errorMessage = 'Erreur lors de la suppression';
-          console.error('Erreur:', error);
+    const departement = this.departements.find(d => d.id === id);
+    const departementName = departement?.nom || 'ce département';
+
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        title: 'Confirmer la suppression',
+        html: `Êtes-vous sûr de vouloir supprimer <strong>${departementName}</strong> ?<br><small class="text-gray-500">Cette action est irréversible</small>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#EF4444',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: 'Oui, supprimer',
+        cancelButtonText: 'Annuler',
+        customClass: {
+          popup: 'rounded-2xl',
+          confirmButton: 'rounded-xl px-6 py-3 font-semibold',
+          cancelButton: 'rounded-xl px-6 py-3 font-semibold'
+        }
+      }).then((result: { isConfirmed: any; }) => {
+        if (result.isConfirmed) {
+          this.departementService.delete(id).subscribe({
+            next: () => {
+              Swal.fire({
+                title: 'Supprimé !',
+                text: 'Le département a été supprimé avec succès',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false,
+                customClass: {
+                  popup: 'rounded-2xl'
+                }
+              });
+              this.loadDepartements();
+            },
+            error: (error: any) => {
+              Swal.fire({
+                title: 'Erreur',
+                text: 'Une erreur est survenue lors de la suppression',
+                icon: 'error',
+                confirmButtonColor: '#3B82F6',
+                customClass: {
+                  popup: 'rounded-2xl',
+                  confirmButton: 'rounded-xl px-6 py-3 font-semibold'
+                }
+              });
+              console.error('Erreur:', error);
+            }
+          });
         }
       });
+    } else {
+      if (confirm(`Êtes-vous sûr de vouloir supprimer ${departementName} ?`)) {
+        this.departementService.delete(id).subscribe({
+          next: () => {
+            this.successMessage = 'Département supprimé avec succès';
+            this.loadDepartements();
+            setTimeout(() => this.successMessage = '', 3000);
+          },
+          error: (error: any) => {
+            this.errorMessage = 'Erreur lors de la suppression';
+            console.error('Erreur:', error);
+          }
+        });
+      }
     }
   }
 
@@ -223,11 +382,39 @@ export class DepartementComponent implements OnInit {
       'Date inconnue';
   }
 
+  formatDateFr(date: Date, format: string): string {
+    if (!date) {
+      return format.includes('HH') ? '--:--' : 'Date inconnue';
+    }
+
+    try {
+      return formatDate(date, format, 'fr-FR');
+    } catch (error) {
+      console.error('Erreur de formatage de date:', error);
+      return format.includes('HH') ? '--:--' : 'Date invalide';
+    }
+  }
+
   getCurrentTime(): string {
     return new Date().toLocaleTimeString('fr-FR', {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  getSpecialitesNames(departementId: number): string {
+    const specialites = this.specialites.filter(s => s.departement_id === departementId);
+
+    if (specialites.length === 0) {
+      return 'Aucune spécialité';
+    }
+
+    if (specialites.length === 1) {
+      return specialites[0].nom;
+    }
+
+    // Si plusieurs spécialités, retourner les noms séparés par des virgules
+    return specialites.map(s => s.nom).join(', ');
   }
 
   getSpecialitesCount(departementId: number): number {
@@ -246,4 +433,13 @@ export class DepartementComponent implements OnInit {
   getCharCount(field: string): number {
     return this.newDepartement[field]?.length || 0;
   }
+
+  // Nouvelle méthode pour tronquer la description
+  getTruncatedDescription(description: string | null | undefined, maxLength: number = 50): string {
+    if (!description) return 'Aucune description';
+    if (description.length <= maxLength) return description;
+    return description.substring(0, maxLength) + '...';
+  }
+
+  protected readonly Math = Math;
 }

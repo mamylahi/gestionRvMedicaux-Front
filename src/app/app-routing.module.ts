@@ -19,11 +19,11 @@ import { RendezvousComponent } from './components/secretaire/rendez-vous/rendez-
  import { ConsultationComponent } from './components/admin/consultation/consultation.component';
  import { AddConsultationComponent } from './components/admin/consultation/add-consultation.component';
  import { CompteRenduComponent } from './components/admin/compte-rendu/compte-rendu.component';
- import { DisponibiliteComponent } from './components/admin/disponibilite/disponibilite.component';
+ import { DisponibiliteComponent } from './components/secretaire/disponibilite/disponibilite.component';
  import { DossierMedicalComponent } from './components/secretaire/dossier-medical/dossier-medical.component';import { PaiementComponent } from './components/secretaire/paiement/paiement.component';
  import {AddRendezVousComponent} from './components/secretaire/rendez-vous/add-rendez-vous.component';
  import {AddCompteRenduComponent} from './components/medecin/compte-rendu/add-compte-rendu.component';
- import {AddDisponibiliteComponent} from './components/admin/disponibilite/add-disponibilite.component';
+ import {AddDisponibiliteComponent} from './components/secretaire/disponibilite/add-disponibilite.component';
  import {AddDossierMedicalComponent} from './components/secretaire/dossier-medical/add-dossier-medical.component';
  import {AddPaiementComponent} from './components/secretaire/paiement/add-paiement.component';
 import {DashboardComponent} from './components/dashboard/dashboard.component';

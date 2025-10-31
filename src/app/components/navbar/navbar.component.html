@@ -66,12 +66,6 @@
         <span *ngIf="!isCollapsed">Médecins</span>
       </a>
 
-      <a class="nav-item flex items-center px-3 py-3 rounded-lg text-blue-100 hover:bg-blue-700 hover:text-white transition-colors"
-         routerLink="/secretaires"
-         routerLinkActive="bg-blue-900 text-white">
-        <i class="fas fa-id-card w-5 mr-3 text-center"></i>
-        <span *ngIf="!isCollapsed">Secrétaires</span>
-      </a>
 
       <a class="nav-item flex items-center px-3 py-3 rounded-lg text-blue-100 hover:bg-blue-700 hover:text-white transition-colors"
          routerLink="/patients"
@@ -93,7 +87,16 @@
         <i class="fas fa-building w-5 mr-3 text-center"></i>
         <span *ngIf="!isCollapsed">Départements</span>
       </a>
+
+      <a class="nav-item flex items-center px-3 py-3 rounded-lg text-blue-100 hover:bg-blue-700 hover:text-white transition-colors"
+         routerLink="/secretaires"
+         routerLinkActive="bg-blue-900 text-white">
+        <i class="fas fa-id-card w-5 mr-3 text-center"></i>
+        <span *ngIf="!isCollapsed">Secrétaires</span>
+      </a>
     </div>
+
+
 
     <!-- Section Secrétaire -->
     <div *ngIf="isSecretaire && isLoggedIn">

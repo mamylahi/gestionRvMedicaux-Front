@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule, formatDate} from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {AuthService} from '../../../services/auth.service';
 import {SpecialiteService} from '../../../services/specialite.service';
+
+// Déclaration pour SweetAlert2
+declare var Swal: any;
 
 interface User {
   id: number;
@@ -16,13 +19,8 @@ interface User {
   email_verified_at?: string;
   created_at: string;
   updated_at: string;
-  specialite_id?: number;
 }
 
-interface Specialite {
-  id: number;
-  nom: string;
-}
 
 @Component({
   selector: 'app-user',
@@ -33,7 +31,6 @@ interface Specialite {
 export class UserComponent implements OnInit {
   users: User[] = [];
   filteredUsers: User[] = [];
-  specialites: Specialite[] = [];
   isLoading: boolean = false;
   errorMessage: string = '';
   successMessage: string = '';
@@ -75,7 +72,6 @@ export class UserComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUsers();
-    this.loadSpecialites();
   }
 
   loadUsers(): void {
@@ -103,22 +99,7 @@ export class UserComponent implements OnInit {
     });
   }
 
-  loadSpecialites(): void {
-    this.specialiteService.getAll().subscribe({
-      next: (data: any) => {
-        if (data && data.data) {
-          this.specialites = Array.isArray(data.data) ? data.data : [data.data];
-        } else if (Array.isArray(data)) {
-          this.specialites = data;
-        } else {
-          this.specialites = [];
-        }
-      },
-      error: (error) => {
-        console.error('Erreur lors du chargement des spécialités:', error);
-      }
-    });
-  }
+
 
   onRoleChange(): void {
     const role = this.newUser.role;
@@ -236,9 +217,6 @@ export class UserComponent implements OnInit {
       role: user.role,
       telephone: user.telephone || '',
       adresse: user.adresse || '',
-      password: '',
-      password_confirmation: '',
-      specialite_id: user.specialite_id || ''
     };
     this.showUserModal = true;
   }
@@ -269,14 +247,42 @@ export class UserComponent implements OnInit {
 
     this.authService.register(userData).subscribe({
       next: (response) => {
-        this.successMessage = 'Utilisateur créé avec succès';
+        // Utiliser SweetAlert2 si disponible
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Succès !',
+            text: 'Utilisateur créé avec succès',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false,
+            customClass: {
+              popup: 'rounded-2xl'
+            }
+          });
+        } else {
+          this.successMessage = 'Utilisateur créé avec succès';
+          setTimeout(() => this.successMessage = '', 3000);
+        }
         this.closeUserModal();
         this.loadUsers();
         this.isLoading = false;
-        setTimeout(() => this.successMessage = '', 3000);
       },
       error: (error) => {
-        this.errorMessage = 'Erreur lors de la création de l\'utilisateur';
+        // Utiliser SweetAlert2 si disponible
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Erreur',
+            text: 'Une erreur est survenue lors de la création',
+            icon: 'error',
+            confirmButtonColor: '#3B82F6',
+            customClass: {
+              popup: 'rounded-2xl',
+              confirmButton: 'rounded-xl px-6 py-3 font-semibold'
+            }
+          });
+        } else {
+          this.errorMessage = 'Erreur lors de la création de l\'utilisateur';
+        }
         this.isLoading = false;
         console.error('Erreur:', error);
       }
@@ -302,14 +308,42 @@ export class UserComponent implements OnInit {
 
     this.authService.updateUser(this.selectedUser.id, updateData).subscribe({
       next: (response) => {
-        this.successMessage = 'Utilisateur modifié avec succès';
+        // Utiliser SweetAlert2 si disponible
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Succès !',
+            text: 'Utilisateur modifié avec succès',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false,
+            customClass: {
+              popup: 'rounded-2xl'
+            }
+          });
+        } else {
+          this.successMessage = 'Utilisateur modifié avec succès';
+          setTimeout(() => this.successMessage = '', 3000);
+        }
         this.closeUserModal();
         this.loadUsers();
         this.isLoading = false;
-        setTimeout(() => this.successMessage = '', 3000);
       },
       error: (error) => {
-        this.errorMessage = 'Erreur lors de la modification de l\'utilisateur';
+        // Utiliser SweetAlert2 si disponible
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Erreur',
+            text: 'Une erreur est survenue lors de la modification',
+            icon: 'error',
+            confirmButtonColor: '#3B82F6',
+            customClass: {
+              popup: 'rounded-2xl',
+              confirmButton: 'rounded-xl px-6 py-3 font-semibold'
+            }
+          });
+        } else {
+          this.errorMessage = 'Erreur lors de la modification de l\'utilisateur';
+        }
         this.isLoading = false;
         console.error('Erreur:', error);
       }
@@ -317,18 +351,69 @@ export class UserComponent implements OnInit {
   }
 
   deleteUser(user: User): void {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${user.prenom} ${user.nom} ?`)) {
-      this.authService.deleteUser(user.id).subscribe({
-        next: () => {
-          this.successMessage = 'Utilisateur supprimé avec succès';
-          this.loadUsers();
-          setTimeout(() => this.successMessage = '', 3000);
-        },
-        error: (error) => {
-          this.errorMessage = 'Erreur lors de la suppression de l\'utilisateur';
-          console.error('Erreur:', error);
+    // Utiliser SweetAlert2 si disponible
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        title: 'Confirmer la suppression',
+        html: `Êtes-vous sûr de vouloir supprimer l'utilisateur <strong>${user.prenom} ${user.nom}</strong> ?<br><small class="text-gray-500">Cette action est irréversible</small>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#EF4444',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: 'Oui, supprimer',
+        cancelButtonText: 'Annuler',
+        customClass: {
+          popup: 'rounded-2xl',
+          confirmButton: 'rounded-xl px-6 py-3 font-semibold',
+          cancelButton: 'rounded-xl px-6 py-3 font-semibold'
+        }
+      }).then((result: { isConfirmed: any; }) => {
+        if (result.isConfirmed) {
+          this.authService.deleteUser(user.id).subscribe({
+            next: () => {
+              Swal.fire({
+                title: 'Supprimé !',
+                text: 'L\'utilisateur a été supprimé avec succès',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false,
+                customClass: {
+                  popup: 'rounded-2xl'
+                }
+              });
+              this.loadUsers();
+            },
+            error: (error) => {
+              Swal.fire({
+                title: 'Erreur',
+                text: 'Une erreur est survenue lors de la suppression',
+                icon: 'error',
+                confirmButtonColor: '#3B82F6',
+                customClass: {
+                  popup: 'rounded-2xl',
+                  confirmButton: 'rounded-xl px-6 py-3 font-semibold'
+                }
+              });
+              console.error('Erreur:', error);
+            }
+          });
         }
       });
+    } else {
+      // Fallback vers confirm natif si SweetAlert2 n'est pas disponible
+      if (confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${user.prenom} ${user.nom} ?`)) {
+        this.authService.deleteUser(user.id).subscribe({
+          next: () => {
+            this.successMessage = 'Utilisateur supprimé avec succès';
+            this.loadUsers();
+            setTimeout(() => this.successMessage = '', 3000);
+          },
+          error: (error) => {
+            this.errorMessage = 'Erreur lors de la suppression de l\'utilisateur';
+            console.error('Erreur:', error);
+          }
+        });
+      }
     }
   }
 
@@ -350,10 +435,12 @@ export class UserComponent implements OnInit {
     };
   }
 
-  getSpecialiteNom(specialiteId: number | string): string {
-    const specialite = this.specialites.find(s => s.id == specialiteId);
-    return specialite ? specialite.nom : '';
-  }
+
 
   protected readonly Math = Math;
+
+  // Méthode pour formater les dates en français
+  formatDateFr(date: string, format: string): string {
+    return formatDate(date, format, 'fr-FR');
+  }
 }

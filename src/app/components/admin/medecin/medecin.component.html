@@ -1,230 +1,446 @@
-<div class="min-h-screen bg-gray-50 ml-64 p-6 transition-all duration-300">
-  <!-- En-tête -->
-  <div class="mb-8">
-    <div class="flex justify-between items-center">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-900">Gestion des Médecins</h1>
-        <p class="text-gray-600 mt-2">Liste des médecins de l'établissement</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Filtres et Recherche -->
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-    <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
-      <!-- Recherche -->
-      <div class="lg:col-span-2">
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Rechercher par nom, numéro
-        </label>
-        <div class="relative">
-          <input
-            type="text"
-            [(ngModel)]="searchTerm"
-            (input)="onSearch()"
-            placeholder="Nom, prénom, numéro..."
-            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-          <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+<!-- medecin.component.html -->
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+  <!-- Header avec stats -->
+  <div class="ml-0 lg:ml-64 transition-all duration-300">
+    <div class="px-4 sm:px-6 lg:px-8 py-8">
+      <!-- En-tête de page -->
+      <div class="mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              Gestion des Médecins
+            </h1>
+            <p class="mt-2 text-gray-600">Gérez et administrez tous les médecins de la clinique Khadija</p>
+          </div>
+          <button
+            (click)="openAddMedecinModal()"
+            class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 transform hover:scale-105 transition-all duration-200">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Nouveau Médecin
+          </button>
         </div>
       </div>
 
-      <!-- Filtre Spécialité -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Spécialité
-        </label>
-        <select
-          [(ngModel)]="selectedSpecialiteId"
-          (change)="onFilterBySpecialite()"
-          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-colors">
-          <option value="">Toutes les spécialités</option>
-          <option *ngFor="let spec of specialites" [value]="spec.id">
-            {{ spec.nom }}
-          </option>
-        </select>
-      </div>
-
-      <!-- Filtre Statut -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Statut
-        </label>
-        <select
-          [(ngModel)]="filterDisponible"
-          (change)="onSearch()"
-          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-colors">
-          <option value="">Tous les statuts</option>
-          <option value="true">Disponible</option>
-          <option value="false">Non disponible</option>
-        </select>
-      </div>
-
-      <!-- Bouton Réinitialiser -->
-      <div class="flex items-end">
-        <button
-          (click)="onResetFilters()"
-          class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg font-medium flex items-center justify-center transition-colors">
-          <i class="fas fa-redo mr-2"></i>
-          Réinitialiser
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="flex justify-center items-center py-12">
-    <div class="text-center">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-      <p class="text-gray-600">Chargement des médecins...</p>
-    </div>
-  </div>
-
-  <!-- Error Message -->
-  <div *ngIf="errorMessage && !isLoading" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-    <div class="flex items-center">
-      <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
-      <p class="text-red-700">{{ errorMessage }}</p>
-    </div>
-  </div>
-
-  <!-- Statistiques -->
-  <div *ngIf="!isLoading && !errorMessage" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <div class="flex items-center">
-        <div class="p-3 bg-blue-100 rounded-lg mr-4">
-          <i class="fas fa-user-md text-blue-600 text-xl"></i>
-        </div>
-        <div>
-          <p class="text-sm font-medium text-gray-600">Total Médecins</p>
-          <p class="text-2xl font-bold text-gray-900">{{ medecins.length }}</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <div class="flex items-center">
-        <div class="p-3 bg-green-100 rounded-lg mr-4">
-          <i class="fas fa-check-circle text-green-600 text-xl"></i>
-        </div>
-        <div>
-          <p class="text-sm font-medium text-gray-600">Disponibles</p>
-          <p class="text-2xl font-bold text-gray-900">
-            {{ getAvailableMedecinsCount() }}
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <div class="flex items-center">
-        <div class="p-3 bg-purple-100 rounded-lg mr-4">
-          <i class="fas fa-stethoscope text-purple-600 text-xl"></i>
-        </div>
-        <div>
-          <p class="text-sm font-medium text-gray-600">Spécialités</p>
-          <p class="text-2xl font-bold text-gray-900">{{ specialites.length }}</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <div class="flex items-center">
-        <div class="p-3 bg-orange-100 rounded-lg mr-4">
-          <i class="fas fa-clock text-orange-600 text-xl"></i>
-        </div>
-        <div>
-          <p class="text-sm font-medium text-gray-600">Non disponibles</p>
-          <p class="text-2xl font-bold text-gray-900">
-            {{ getUnavailableMedecinsCount() }}
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Liste des Médecins -->
-  <div *ngIf="!isLoading && !errorMessage">
-    <!-- En-tête résultats -->
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl font-semibold text-gray-900">
-        {{ filteredMedecins.length }} médecin(s) trouvé(s)
-      </h2>
-      <div class="text-sm text-gray-500">
-        Affichage de {{ filteredMedecins.length }} sur {{ medecins.length }}
-      </div>
-    </div>
-
-    <!-- Grid des médecins -->
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-      <!-- Carte Médecin -->
-      <div *ngFor="let medecin of filteredMedecins"
-           class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
-
-        <!-- En-tête carte -->
-        <div class="p-6 border-b border-gray-100">
-          <div class="flex justify-between items-start mb-4">
+      <!-- Statistiques -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border-l-4 border-blue-500">
+          <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-lg font-bold text-gray-900">
-                {{ getMedecinName(medecin) }}
-              </h3>
-              <div class="flex items-center mt-1">
-                <span [ngClass]="{
-                  'bg-green-100 text-green-800': medecin.disponible,
-                  'bg-red-100 text-red-800': !medecin.disponible
-                }" class="px-2 py-1 rounded-full text-xs font-medium">
-                  <i class="fas fa-circle mr-1 text-[10px]"></i>
-                  {{ medecin.disponible ? 'Disponible' : 'Non disponible' }}
-                </span>
+              <p class="text-sm font-medium text-gray-600 mb-1">Total Médecins</p>
+              <p class="text-3xl font-bold text-gray-900">{{ medecins.length }}</p>
+            </div>
+            <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center">
+              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border-l-4 border-green-500">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-600 mb-1">Disponibles</p>
+              <p class="text-3xl font-bold text-gray-900">{{ getAvailableMedecinsCount() }}</p>
+            </div>
+            <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center">
+              <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border-l-4 border-orange-500">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-600 mb-1">Non Disponibles</p>
+              <p class="text-3xl font-bold text-gray-900">{{ getUnavailableMedecinsCount() }}</p>
+            </div>
+            <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center">
+              <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border-l-4 border-purple-500">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-600 mb-1">Spécialités</p>
+              <p class="text-3xl font-bold text-gray-900">{{ specialites.length }}</p>
+            </div>
+            <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center">
+              <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages d'alerte -->
+      <div *ngIf="successMessage" class="mb-6 bg-green-50 border-l-4 border-green-500 rounded-lg p-4 shadow-md animate-fade-in">
+        <div class="flex items-center">
+          <svg class="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <p class="text-green-800 font-medium">{{ successMessage }}</p>
+        </div>
+      </div>
+
+      <div *ngIf="errorMessage" class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-lg p-4 shadow-md animate-fade-in">
+        <div class="flex items-center">
+          <svg class="w-6 h-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <p class="text-red-800 font-medium">{{ errorMessage }}</p>
+        </div>
+      </div>
+
+      <!-- Filtres -->
+      <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+        <div class="flex items-center gap-2 mb-4">
+          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+          </svg>
+          <h2 class="text-lg font-semibold text-gray-800">Filtres de recherche</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="relative">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Recherche</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+              </div>
+              <input
+                type="text"
+                [(ngModel)]="searchTerm"
+                (input)="onSearch()"
+                placeholder="Nom, numéro, spécialité..."
+                class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Spécialité</label>
+            <select
+              [(ngModel)]="selectedSpecialiteId"
+              (change)="onSearch()"
+              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200">
+              <option value="">Toutes les spécialités</option>
+              <option *ngFor="let specialite of specialites" [value]="specialite.id">
+                {{ specialite.nom }}
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Disponibilité</label>
+            <select
+              [(ngModel)]="filterDisponible"
+              (change)="onSearch()"
+              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200">
+              <option value="">Tous</option>
+              <option value="true">Disponible</option>
+              <option value="false">Non disponible</option>
+            </select>
+          </div>
+
+          <div class="flex items-end">
+            <button
+              (click)="onResetFilters()"
+              class="w-full px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all duration-200 flex items-center justify-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              Réinitialiser
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tableau des médecins -->
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+            <tr>
+              <th class="px-6 py-4 text-left text-sm font-semibold">Médecin</th>
+              <th class="px-6 py-4 text-left text-sm font-semibold">Spécialité</th>
+              <th class="px-6 py-4 text-left text-sm font-semibold">N° Médecin</th>
+              <th class="px-6 py-4 text-center text-sm font-semibold">Disponibilité</th>
+              <th class="px-6 py-4 text-center text-sm font-semibold">Actions</th>
+            </tr>
+            </thead>
+            <tbody *ngIf="!isLoading" class="divide-y divide-gray-100">
+            <tr *ngFor="let medecin of filteredMedecins" class="hover:bg-blue-50 transition-colors duration-150">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold shadow-md">
+                    {{ medecin.user?.prenom?.charAt(0) || 'D' }}{{ medecin.user?.nom?.charAt(0) || 'R' }}
+                  </div>
+                  <div>
+                    <p class="font-semibold text-gray-900">Dr. {{ getMedecinName(medecin) }}</p>
+                    <p class="text-sm text-gray-500">ID: #{{ medecin.id }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-700 rounded-full text-xs font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
+                    {{ getSpecialiteName(medecin) }}
+                  </span>
+              </td>
+              <td class="px-6 py-4">
+                  <span class="text-sm font-mono text-gray-700 bg-gray-100 px-3 py-1 rounded-lg">
+                    {{ medecin.numero_medecin }}
+                  </span>
+              </td>
+              <td class="px-6 py-4 text-center">
+                  <span *ngIf="medecin.disponible" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                    Disponible
+                  </span>
+                <span *ngIf="!medecin.disponible" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-100 text-orange-800 rounded-full text-xs font-semibold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+                    Non disponible
+                  </span>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex items-center justify-center gap-2">
+                  <button
+                    (click)="openEditMedecinModal(medecin)"
+                    class="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200"
+                    title="Modifier">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                  </button>
+                  <button
+                    (click)="onDelete(medecin.id)"
+                    class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-400 transition-all duration-200"
+                    title="Supprimer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="filteredMedecins.length === 0">
+              <td colspan="6" class="px-6 py-12 text-center">
+                <div class="flex flex-col items-center justify-center gap-3">
+                  <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                  </svg>
+                  <p class="text-gray-500 text-lg font-medium">Aucun médecin trouvé</p>
+                  <p class="text-gray-400 text-sm">Modifiez vos critères de recherche</p>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+            <tbody *ngIf="isLoading">
+            <tr>
+              <td colspan="6" class="px-6 py-12 text-center">
+                <div class="flex flex-col items-center justify-center gap-3">
+                  <div class="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                  <p class="text-gray-600 font-medium">Chargement des médecins...</p>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Ajout/Modification -->
+  <div *ngIf="showMedecinModal" class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full transform transition-all duration-300 animate-scale-in">
+      <!-- En-tête modal -->
+      <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5 rounded-t-2xl">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-bold text-white flex items-center gap-2">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path *ngIf="!isEditing" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+              <path *ngIf="isEditing" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+            {{ isEditing ? 'Modifier le médecin' : 'Nouveau médecin' }}
+          </h3>
+          <button
+            (click)="closeMedecinModal()"
+            class="text-white hover:text-gray-200 transition-colors duration-200">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Contenu modal -->
+      <div class="px-6 py-6 max-h-[70vh] overflow-y-auto">
+        <form class="space-y-5">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Nom *</label>
+              <input
+                type="text"
+                [(ngModel)]="newMedecin.nom"
+                name="nom"
+                required
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200"
+                placeholder="Nom de famille">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Prénom *</label>
+              <input
+                type="text"
+                [(ngModel)]="newMedecin.prenom"
+                name="prenom"
+                required
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200"
+                placeholder="Prénom">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
+            <input
+              type="email"
+              [(ngModel)]="newMedecin.email"
+              name="email"
+              required
+              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200"
+              placeholder="exemple@email.com">
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Téléphone</label>
+              <input
+                type="tel"
+                [(ngModel)]="newMedecin.telephone"
+                name="telephone"
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200"
+                placeholder="+221 XX XXX XX XX">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Numéro Médecin *</label>
+              <input
+                type="text"
+                [(ngModel)]="newMedecin.numero_medecin"
+                name="numero_medecin"
+                required
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200"
+                placeholder="MED-XXXX">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Spécialité *</label>
+              <select
+                [(ngModel)]="newMedecin.specialite_id"
+                name="specialite_id"
+                required
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200">
+                <option value="">Sélectionner une spécialité</option>
+                <option *ngFor="let specialite of specialites" [value]="specialite.id">
+                  {{ specialite.nom }}
+                </option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Disponibilité</label>
+              <div class="flex items-center h-12">
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="newMedecin.disponible"
+                    name="disponible"
+                    class="sr-only peer">
+                  <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-500"></div>
+                  <span class="ml-3 text-sm font-medium text-gray-700">{{ newMedecin.disponible ? 'Disponible' : 'Non disponible' }}</span>
+                </label>
               </div>
             </div>
-            <div class="text-right">
-              <p class="text-sm text-gray-500">N°: {{ medecin.numero_medecin }}</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Adresse</label>
+            <textarea
+              [(ngModel)]="newMedecin.adresse"
+              name="adresse"
+              rows="3"
+              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200"
+              placeholder="Adresse complète"></textarea>
+          </div>
+
+          <div *ngIf="!isEditing" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Mot de passe *</label>
+              <input
+                type="password"
+                [(ngModel)]="newMedecin.password"
+                name="password"
+                required
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200"
+                placeholder="••••••••">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Confirmation *</label>
+              <input
+                type="password"
+                [(ngModel)]="newMedecin.password_confirmation"
+                name="password_confirmation"
+                required
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200"
+                placeholder="••••••••">
             </div>
           </div>
 
-          <!-- Informations principales -->
-          <div class="space-y-3">
-            <div class="flex items-center text-gray-600">
-              <i class="fas fa-briefcase-medical w-5 mr-3 text-blue-500"></i>
-              <span class="text-sm">{{ getSpecialiteName(medecin) }}</span>
-            </div>
-
-            <div class="flex items-center text-gray-600">
-              <i class="fas fa-envelope w-5 mr-3 text-blue-500"></i>
-              <span class="text-sm">{{ medecin.user?.email }}</span>
-            </div>
-
-            <div class="flex items-center text-gray-600">
-              <i class="fas fa-phone w-5 mr-3 text-blue-500"></i>
-              <span class="text-sm">{{ medecin.user?.telephone || 'Non renseigné' }}</span>
-            </div>
+          <div *ngIf="isEditing" class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg">
+            <p class="text-sm text-blue-800">
+              <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Laissez les champs mot de passe vides pour ne pas modifier le mot de passe actuel
+            </p>
           </div>
-        </div>
-
-        <!-- Informations secondaires -->
-        <div class="p-6 bg-gray-50 rounded-b-xl">
-          <div class="flex justify-between items-center text-sm text-gray-500 mb-4">
-            <div class="flex items-center">
-              <i class="fas fa-calendar-plus mr-2"></i>
-              <span>Créé le: {{ medecin.created_at | date:'dd/MM/yyyy' }}</span>
-            </div>
-          </div>
-          
-        </div>
+        </form>
       </div>
-    </div>
 
-    <!-- Message aucun résultat -->
-    <div *ngIf="filteredMedecins.length === 0 && !isLoading"
-         class="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-200">
-      <i class="fas fa-user-md text-gray-300 text-5xl mb-4"></i>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">Aucun médecin trouvé</h3>
-      <p class="text-gray-500 mb-4">Aucun médecin ne correspond à vos critères de recherche.</p>
-      <button
-        (click)="onResetFilters()"
-        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
-        Réinitialiser les filtres
-      </button>
+      <!-- Footer modal -->
+      <div class="bg-gray-50 px-6 py-4 rounded-b-2xl flex items-center justify-end gap-3 border-t border-gray-200">
+        <button
+          (click)="closeMedecinModal()"
+          class="px-6 py-3 bg-white text-gray-700 font-medium rounded-xl border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all duration-200">
+          Annuler
+        </button>
+        <button
+          (click)="saveMedecin()"
+          [disabled]="isLoading"
+          class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2">
+          <svg *ngIf="!isLoading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          <div *ngIf="isLoading" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          {{ isEditing ? 'Mettre à jour' : 'Créer' }}
+        </button>
+      </div>
     </div>
   </div>
 </div>

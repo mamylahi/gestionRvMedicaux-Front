@@ -98,7 +98,7 @@ export class MedecinCompteRenduComponent implements OnInit {
 
   supprimerCompteRendu(compteRenduId: number): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce compte rendu ?')) {
-      this.compteRenduService.delete(compteRenduId.toString()).subscribe({
+      this.compteRenduService.delete(compteRenduId).subscribe({
         next: () => {
           this.loadCompteRenduPatients();
         },
