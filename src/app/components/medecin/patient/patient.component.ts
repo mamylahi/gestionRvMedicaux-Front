@@ -40,7 +40,6 @@ export class MedecinPatientComponent implements OnInit {
       next: (data: Patient[]) => {
         this.patients = data;
         this.loading = false;
-        console.log('Patients chargés:', this.patients);
       },
       error: (error: any) => {
         this.errorMessage = 'Erreur lors du chargement des patients';
@@ -69,7 +68,6 @@ export class MedecinPatientComponent implements OnInit {
   }
 
   voirDossierMedical(patientId: number): void {
-    console.log('Voir dossier médical du patient:', patientId);
     this.loadingDossier = true;
     this.dossierErrorMessage = '';
     this.showModal = true;
@@ -79,7 +77,6 @@ export class MedecinPatientComponent implements OnInit {
       next: (dossier: DossierMedical) => {
         this.selectedDossierMedical = dossier;
         this.loadingDossier = false;
-        console.log('Dossier médical chargé:', dossier);
       },
       error: (error: any) => {
         this.dossierErrorMessage = 'Erreur lors du chargement du dossier médical';
@@ -105,7 +102,6 @@ export class MedecinPatientComponent implements OnInit {
   }
 
   prendreRendezVous(patientId: number): void {
-    console.log('Prendre rendez-vous pour le patient:', patientId);
     // Navigation vers la page de rendez-vous
     this.router.navigate(['/rendez-vous'], { queryParams: { patientId } });
   }

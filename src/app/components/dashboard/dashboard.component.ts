@@ -47,14 +47,12 @@ export class DashboardComponent implements OnInit {
 
   checkAuthentication() {
     this.isLoggedIn = this.authService.isAuthenticated();
-    console.log('Is Logged In:', this.isLoggedIn);
   }
 
   getUserInfo() {
     if (this.isLoggedIn) {
       this.authService.getAuthenticatedUser().subscribe({
         next: (user) => {
-          console.log('User data received in dashboard:', user);
           this.userName = (user.data.nom && user.data.prenom)
             ? `${user.data.nom} ${user.data.prenom}`
             : (user.data.name || 'Utilisateur');
@@ -81,7 +79,6 @@ export class DashboardComponent implements OnInit {
   }
 
   loadDashboardData(user: any) {
-    console.log('Loading dashboard data for role:', user.data.role);
 
     if (this.isAdmin) {
       this.loadAdminDashboard();
@@ -97,11 +94,9 @@ export class DashboardComponent implements OnInit {
   }
 
   loadAdminDashboard() {
-    console.log('Loading admin dashboard with statistics...');
 
     this.statistiqueService.getStatistiquesAdmin().subscribe({
       next: (response) => {
-        console.log('Admin statistics loaded:', response);
 
         if (response.success && response.data) {
           this.statistiquesAdmin = response.data;
@@ -155,7 +150,6 @@ export class DashboardComponent implements OnInit {
   }
 
   loadMedecinDashboard(medecinId: string) {
-    console.log('Loading medecin dashboard for ID:', medecinId);
 
     forkJoin({
       rendezVous: this.rendezVousService.getByMedecin(medecinId).pipe(catchError(() => of([] as any))),
@@ -163,7 +157,6 @@ export class DashboardComponent implements OnInit {
       patients: this.rendezVousService.getByMedecin(medecinId).pipe(catchError(() => of([] as any)))
     }).subscribe({
       next: (data: any) => {
-        console.log('Medecin dashboard data:', data);
 
         const today = new Date().toDateString();
         const rendezVousData: any = data.rendezVous || [];
@@ -194,7 +187,6 @@ export class DashboardComponent implements OnInit {
           prochainRendezVous: prochainRdv || null
         };
 
-        console.log('Medecin dashboard data processed:', this.dashboardData);
         this.loading = false;
       },
       error: (error) => {
@@ -213,7 +205,6 @@ export class DashboardComponent implements OnInit {
 
   loadSecretaireDashboard() {
     console.log('Loading secretaire dashboard...');
-
     forkJoin({
       rendezVous: this.rendezVousService.getAll().pipe(catchError(() => of([] as any))),
       paiements: this.paiementService.getAll().pipe(catchError(() => of([] as any)))

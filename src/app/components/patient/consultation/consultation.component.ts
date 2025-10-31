@@ -35,7 +35,6 @@ export class PatientConsultationComponent implements OnInit {
 
     this.patientService.getMesConsultations().subscribe({
       next: (data) => {
-        console.log('Mes consultations chargées:', data);
         this.consultations = data;
         this.filteredConsultations = data;
         this.isLoading = false;

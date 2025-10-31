@@ -31,7 +31,6 @@ export class MedecinConsultationComponent implements OnInit {
       next: (data: Consultation[]) => {
         this.consultations = data;
         this.loading = false;
-        console.log(this.consultations);
       },
       error: (error: any) => {
         this.errorMessage = 'Erreur lors du chargement des consultations';
@@ -42,10 +41,8 @@ export class MedecinConsultationComponent implements OnInit {
   }
 
   voirDetails(consultationId: number): void {
-    console.log('Voir détails de la consultation:', consultationId);
   }
 
   creerCompteRendu(consultationId: number): void {
-    console.log('Créer compte rendu pour la consultation:', consultationId);
   }
 }

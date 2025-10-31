@@ -84,6 +84,5 @@ export class CompteRenduService {
   generatePdfClient(compteRendu: CompteRendu): void {
     // Cette méthode nécessiterait une bibliothèque comme jsPDF
     // Exemple d'implémentation à adapter selon vos besoins
-    console.log('Génération PDF pour:', compteRendu);
   }
 }

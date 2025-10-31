@@ -44,7 +44,6 @@ export class MedecinRendezVousComponent implements OnInit {
     this.medecinService.getMesRendezVous().subscribe({
       next: (data: RendezVous[]) => {
         this.rendezVous = data;
-        console.log('Rendez-vous chargés:', this.rendezVous);
         this.loading = false;
       },
       error: (error: any) => {

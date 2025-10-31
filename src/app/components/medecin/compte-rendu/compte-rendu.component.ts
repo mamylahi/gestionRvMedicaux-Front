@@ -40,7 +40,6 @@ export class MedecinCompteRenduComponent implements OnInit {
       next: (data: CompteRendu[]) => {
         this.comptesRendus = data;
         this.loading = false;
-        console.log('Comptes rendus chargés:', this.comptesRendus);
       },
       error: (error: any) => {
         this.errorMessage = 'Erreur lors du chargement des comptes rendus';
@@ -55,7 +54,6 @@ export class MedecinCompteRenduComponent implements OnInit {
       next: (data: any[]) => {
         // Récupérer toutes les consultations sans filtrage
         this.consultations = data;
-        console.log('Toutes les consultations chargées:', this.consultations);
       },
       error: (error) => {
         console.error('Erreur lors du chargement des consultations:', error);

@@ -152,7 +152,6 @@ export class PatientComponent implements OnInit {
     } else {
       alert('Fonctionnalité d\'export en cours de développement');
     }
-    console.log('Export des patients', this.filteredPatients);
   }
 
   // Gestion du modal

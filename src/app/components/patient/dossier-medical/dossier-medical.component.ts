@@ -38,10 +38,7 @@ export class PatientDossierMedicalComponent implements OnInit {
 
     this.patientService.getMonDossierMedical().subscribe({
       next: (response: any) => {
-        console.log('=== DÉBUT DEBUG ===');
-        console.log('Réponse complète:', response);
-        console.log('Type:', typeof response);
-        console.log('Keys:', Object.keys(response));
+
 
         // La structure de réponse de votre backend Laravel:
         // { success: true, data: { dossier_medical: {...}, patient: {...}, nombre_consultations: X, derniere_consultation: {...} } }
@@ -49,9 +46,6 @@ export class PatientDossierMedicalComponent implements OnInit {
         if (response?.success && response?.data) {
           const data = response.data;
 
-          console.log('Data extraite:', data);
-          console.log('Dossier médical:', data.dossier_medical);
-          console.log('Patient:', data.patient);
 
           // Assigner les données
           this.dossierMedical = data.dossier_medical;
@@ -64,20 +58,16 @@ export class PatientDossierMedicalComponent implements OnInit {
             this.dossierMedical.patient = this.patient;
           }
 
-          console.log('✅ Dossier médical final:', this.dossierMedical);
-          console.log('✅ Patient:', this.patient);
-          console.log('✅ Nombre consultations:', this.nombreConsultations);
-          console.log('=== FIN DEBUG ===');
 
         } else {
-          console.error('❌ Structure de réponse invalide:', response);
+          console.error(' Structure de réponse invalide:', response);
           this.errorMessage = 'Format de réponse invalide';
         }
 
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('❌ Erreur détaillée:', error);
+        console.error(' Erreur détaillée:', error);
         console.error('Status:', error.status);
         console.error('Message:', error.message);
         console.error('Error body:', error.error);

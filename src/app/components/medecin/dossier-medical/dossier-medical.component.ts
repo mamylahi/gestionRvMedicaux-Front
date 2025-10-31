@@ -60,7 +60,6 @@ export class MedecinDossierMedicalComponent implements OnInit {
       next: (data: DossierMedical[]) => {
         this.dossiersMedicaux = data;
         this.loading = false;
-        console.log(this.dossiersMedicaux);
       },
       error: (error: any) => {
         this.errorMessage = 'Erreur lors du chargement des dossiers médicaux';

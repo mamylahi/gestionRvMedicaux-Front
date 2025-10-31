@@ -76,7 +76,6 @@ export class MedecinComponent implements OnInit {
         } else {
           this.specialites = [];
         }
-        console.log('Spécialités chargées:', this.specialites);
       },
       error: (error) => {
         console.error('Erreur chargement spécialités:', error);
@@ -101,7 +100,6 @@ export class MedecinComponent implements OnInit {
 
         this.filteredMedecins = [...this.medecins];
         this.isLoading = false;
-        console.log('Médecins chargés:', this.medecins);
       },
       error: (error) => {
         this.errorMessage = 'Erreur lors du chargement des médecins';
@@ -224,10 +222,6 @@ export class MedecinComponent implements OnInit {
     this.isEditing = true;
     this.selectedMedecin = medecin;
 
-    console.log('📋 Médecin sélectionné:', medecin);
-    console.log('👤 User ID:', medecin.user_id);
-    console.log('🏥 Specialite ID:', medecin.specialite_id);
-
     this.newMedecin = {
       user_id: medecin.user_id || medecin.user?.id,
       nom: medecin.user?.nom || '',
@@ -242,7 +236,6 @@ export class MedecinComponent implements OnInit {
       password_confirmation: ''
     };
 
-    console.log('📤 newMedecin préparé:', this.newMedecin);
 
     this.showMedecinModal = true;
   }
@@ -352,22 +345,8 @@ export class MedecinComponent implements OnInit {
       updateData.password = this.newMedecin.password;
       updateData.password_confirmation = this.newMedecin.password_confirmation;
     }
-
-    console.log('==========================================');
-    console.log('📤 DONNÉES ENVOYÉES AU BACKEND');
-    console.log('==========================================');
-    console.log('updateData:', updateData);
-    console.log('------------------------------------------');
-    console.log('user_id:', updateData.user_id, '(type:', typeof updateData.user_id + ')');
-    console.log('specialite_id:', updateData.specialite_id, '(type:', typeof updateData.specialite_id + ')');
-    console.log('numero_medecin:', updateData.numero_medecin);
-    console.log('disponible:', updateData.disponible);
-    console.log('==========================================');
-
     this.medecinService.update(this.selectedMedecin.id.toString(), updateData).subscribe({
       next: (response) => {
-        console.log('✅ Réponse du serveur:', response);
-
         if (typeof Swal !== 'undefined') {
           Swal.fire({
             title: 'Succès !',
