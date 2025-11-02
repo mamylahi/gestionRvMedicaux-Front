@@ -15,6 +15,10 @@ export class DisponibiliteService {
     return this.http.get<Disponibilite[]>(this.URL);
   }
 
+  getAllWithRelations() {
+    return this.http.get<Disponibilite[]>(`${this.URL}?with=medecin.user`);
+  }
+
   getById(id: string) {
     return this.http.get<Disponibilite>(`${this.URL}/${id}`);
   }

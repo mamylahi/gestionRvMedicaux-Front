@@ -6,11 +6,12 @@ import { CompteRenduService } from '../../../services/compte-rendu.service';
 import { DatePipe } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import {AddCompteRenduComponent} from './add-compte-rendu.component';
+declare var Swal: any;
 
 @Component({
   selector: 'app-compte-rendu',
   templateUrl: './compte-rendu.component.html',
-  imports: [DatePipe, CommonModule, AddCompteRenduComponent]
+  imports: [CommonModule, AddCompteRenduComponent]
 })
 export class MedecinCompteRenduComponent implements OnInit {
   comptesRendus: CompteRendu[] = [];
@@ -118,5 +119,39 @@ export class MedecinCompteRenduComponent implements OnInit {
     this.closeModal();
     this.loadCompteRenduPatients();
     this.loadConsultations();
+  }
+
+deleteCompteRendu(compteRenduId: number): void {
+    Swal.fire({
+      title: 'Êtes-vous sûr ?',
+      text: "Cette action est irréversible !",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Oui, supprimer !',
+      cancelButtonText: 'Annuler'
+    }).then((result: { isConfirmed: any; }) => {
+      if (result.isConfirmed) {
+        this.compteRenduService.delete(compteRenduId).subscribe({
+          next: () => {
+            this.loadCompteRenduPatients();
+            Swal.fire(
+              'Supprimé !',
+              'Le compte rendu a été supprimé.',
+              'success'
+            );
+          },
+          error: (error) => {
+            console.error('Erreur lors de la suppression:', error);
+            Swal.fire(
+              'Erreur !',
+              'Erreur lors de la suppression du compte rendu',
+              'error'
+            );
+          }
+        });
+      }
+    });
   }
 }

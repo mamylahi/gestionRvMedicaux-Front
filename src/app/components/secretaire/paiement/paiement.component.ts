@@ -11,7 +11,6 @@ import {PaiementService} from '../../../services/paiement.service';
   templateUrl: './paiement.component.html',
   standalone: true,
   imports: [
-    NgClass,
     CurrencyPipe,
     DatePipe,
     NgFor,

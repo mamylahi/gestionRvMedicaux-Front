@@ -38,7 +38,6 @@ import {PatientDossierMedicalComponent} from './components/patient/dossier-medic
 import {PatientPaiementsComponent} from './components/patient/paiement/paiement.component';
 import {PatientRendezVousComponent} from './components/patient/rendez-vous/rendez-vous.component';
 import {ProfileComponent} from './components/profile/profile.component';
-
 const routes: Routes = [
 
   // Public routes

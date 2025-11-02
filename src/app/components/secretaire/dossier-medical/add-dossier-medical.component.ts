@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import {CommonModule, NgClass} from '@angular/common';
-import {Patient} from '../../../models/patient.model';
-import {DossierMedicalService} from '../../../services/dossier-medical.service';
-import {PatientService} from '../../../services/patient.service';
-
+import { CommonModule, NgClass } from '@angular/common';
+import { Patient } from '../../../models/patient.model';
+import { DossierMedicalService } from '../../../services/dossier-medical.service';
+import { PatientService } from '../../../services/patient.service';
 
 @Component({
   selector: 'app-add-dossier-medical',
@@ -59,8 +58,8 @@ export class AddDossierMedicalComponent implements OnInit {
 
   loadPatients(): void {
     this.patientService.getAll().subscribe({
-      next: (data) => {
-        this.patients = data;
+      next: (data: any) => {
+        this.patients = data.data || data || [];
         this.filterPatientsDisponibles();
       },
       error: (error) => {
@@ -109,7 +108,7 @@ export class AddDossierMedicalComponent implements OnInit {
     });
   }
 
-  formatDateForInput(date: Date): string {
+  formatDateForInput(date: Date | string): string {
     const d = new Date(date);
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -144,9 +143,11 @@ export class AddDossierMedicalComponent implements OnInit {
           setTimeout(() => this.router.navigate(['/dossiers-medicaux']), 1500);
         },
         error: (error) => {
-          this.errorMessage = 'Erreur lors de la modification';
+          this.errorMessage = 'Erreur lors de la modification du dossier';
           this.isSubmitting = false;
-          this.dossierForm.get('patient_id')?.disable();
+          if (this.isEditMode) {
+            this.dossierForm.get('patient_id')?.disable();
+          }
           console.error('Erreur:', error);
         }
       });
@@ -158,7 +159,7 @@ export class AddDossierMedicalComponent implements OnInit {
           setTimeout(() => this.router.navigate(['/dossiers-medicaux']), 1500);
         },
         error: (error) => {
-          this.errorMessage = 'Erreur lors de la création';
+          this.errorMessage = 'Erreur lors de la création du dossier';
           this.isSubmitting = false;
           console.error('Erreur:', error);
         }
@@ -185,23 +186,23 @@ export class AddDossierMedicalComponent implements OnInit {
 
   getPatientInfo(patientId: number): string {
     const patient = this.patients.find(p => p.id === patientId);
-    if (patient) {
-      return `${patient?.user?.nom} ${patient?.user?.prenom} - ${patient.numero_patient}`;
+    if (patient?.user) {
+      return `${patient.user.nom} ${patient.user.prenom} - ${patient.numero_patient}`;
     }
     return '';
   }
 
   getGroupeSanguinBadgeClass(groupe: string): string {
     const classes: { [key: string]: string } = {
-      'A+': 'bg-danger',
-      'A-': 'bg-warning',
-      'B+': 'bg-info',
-      'B-': 'bg-primary',
-      'AB+': 'bg-success',
-      'AB-': 'bg-dark',
-      'O+': 'bg-danger',
-      'O-': 'bg-warning'
+      'A+': 'bg-red-500',
+      'A-': 'bg-orange-500',
+      'B+': 'bg-blue-500',
+      'B-': 'bg-indigo-500',
+      'AB+': 'bg-green-500',
+      'AB-': 'bg-purple-500',
+      'O+': 'bg-red-600',
+      'O-': 'bg-orange-600'
     };
-    return classes[groupe] || 'bg-secondary';
+    return classes[groupe] || 'bg-gray-500';
   }
 }

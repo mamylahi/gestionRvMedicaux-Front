@@ -119,6 +119,13 @@
       </a>
 
       <a class="nav-item flex items-center px-3 py-3 rounded-lg text-blue-100 hover:bg-blue-700 hover:text-white transition-colors"
+         routerLink="/disponibilites"
+         routerLinkActive="bg-blue-900 text-white">
+        <i class="fas fa-calendar-day w-5 mr-3 text-center"></i>
+        <span *ngIf="!isCollapsed">Disponibilités</span>
+      </a>
+
+      <a class="nav-item flex items-center px-3 py-3 rounded-lg text-blue-100 hover:bg-blue-700 hover:text-white transition-colors"
          routerLink="/paiements"
          routerLinkActive="bg-blue-900 text-white">
         <i class="fas fa-money-bill w-5 mr-3 text-center"></i>

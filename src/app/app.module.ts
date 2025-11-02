@@ -54,7 +54,7 @@ import {CommonModule} from '@angular/common';
     PatientPaiementsComponent,
     PatientRendezVousComponent,
     ProfileComponent,
-    RendezvousComponent
+    RendezvousComponent,
 
 
 

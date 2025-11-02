@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { UserRole } from '../../models/enum';
 import { CommonModule } from '@angular/common';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-auth',
@@ -69,21 +70,51 @@ export class AuthComponent implements OnInit {
           console.log('Token stocké:', response.data.access_token);
           console.log('Utilisateur stocké:', response.data.user);
 
-          this.router.navigate(['/dashboard']);
+          // 🎉 Afficher la notification SweetAlert2 au centre
+          Swal.fire({
+            icon: 'success',
+            title: 'Connexion réussie !',
+            text: `Bienvenue ${response.data.user.prenom || response.data.user.nom || ''}`,
+            confirmButtonText: 'Continuer',
+            confirmButtonColor: '#3B82F6',
+            timer: 3000,
+            timerProgressBar: true,
+            position: 'center',
+            showClass: {
+              popup: 'animate__animated animate__fadeInDown'
+            },
+            hideClass: {
+              popup: 'animate__animated animate__fadeOutUp'
+            }
+          }).then(() => {
+            this.router.navigate(['/dashboard']);
+          });
         } else {
           console.error('Structure de réponse invalide:', response);
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: 'Structure de réponse invalide',
+            confirmButtonColor: '#3B82F6',
+            position: 'center'
+          });
         }
       },
       error: (error) => {
         this.isLoading = false;
         console.error('Erreur login:', error);
 
-        // ✅ Gestion améliorée des erreurs
-        if (error.error && error.error.message) {
-          alert('Erreur: ' + error.error.message);
-        } else {
-          alert('Erreur de connexion');
-        }
+        // ✅ Gestion améliorée des erreurs avec SweetAlert
+        const errorMessage = error.error?.message || 'Erreur de connexion. Veuillez vérifier vos identifiants.';
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Échec de connexion',
+          text: errorMessage,
+          confirmButtonColor: '#3B82F6',
+          confirmButtonText: 'Réessayer',
+          position: 'center'
+        });
       }
     });
   }
@@ -92,12 +123,25 @@ export class AuthComponent implements OnInit {
     this.submitted = true;
 
     if (this.registerForm.invalid) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Formulaire incomplet',
+        text: 'Veuillez remplir tous les champs requis correctement',
+        confirmButtonColor: '#3B82F6',
+        position: 'center'
+      });
       return;
     }
 
     // Vérification de la confirmation du mot de passe
     if (this.registerForm.value.password !== this.registerForm.value.password_confirmation) {
-      alert('Les mots de passe ne correspondent pas');
+      Swal.fire({
+        icon: 'error',
+        title: 'Erreur',
+        text: 'Les mots de passe ne correspondent pas',
+        confirmButtonColor: '#3B82F6',
+        position: 'center'
+      });
       return;
     }
 
@@ -113,22 +157,52 @@ export class AuthComponent implements OnInit {
           localStorage.setItem('user', JSON.stringify(response.data.user));
 
           console.log('Inscription réussie:', response);
-          this.router.navigate(['/medecins']);
+
+          // 🎉 Afficher la notification SweetAlert2 au centre
+          Swal.fire({
+            icon: 'success',
+            title: 'Inscription réussie !',
+            text: `Bienvenue ${response.data.user.prenom || response.data.user.nom || ''}`,
+            confirmButtonText: 'Continuer',
+            confirmButtonColor: '#3B82F6',
+            timer: 3000,
+            timerProgressBar: true,
+            position: 'center',
+            showClass: {
+              popup: 'animate__animated animate__fadeInDown'
+            },
+            hideClass: {
+              popup: 'animate__animated animate__fadeOutUp'
+            }
+          }).then(() => {
+            this.router.navigate(['/medecins']);
+          });
         } else {
           console.error('Structure de réponse invalide:', response);
-          alert('Inscription réussie mais structure de réponse invalide');
+          Swal.fire({
+            icon: 'warning',
+            title: 'Attention',
+            text: 'Inscription réussie mais structure de réponse invalide',
+            confirmButtonColor: '#3B82F6',
+            position: 'center'
+          });
         }
       },
       error: (error) => {
         this.isLoading = false;
         console.error('Erreur register:', error);
 
-        // ✅ Gestion améliorée des erreurs
-        if (error.error && error.error.message) {
-          alert('Erreur: ' + error.error.message);
-        } else {
-          alert('Erreur lors de l\'inscription');
-        }
+        // ✅ Gestion améliorée des erreurs avec SweetAlert
+        const errorMessage = error.error?.message || 'Erreur lors de l\'inscription';
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Échec de l\'inscription',
+          text: errorMessage,
+          confirmButtonColor: '#3B82F6',
+          confirmButtonText: 'Réessayer',
+          position: 'center'
+        });
       }
     });
   }

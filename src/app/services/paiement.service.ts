@@ -47,8 +47,4 @@ export class PaiementService {
     return this.http.get<Paiement[]>(`${this.URL}?with=consultation.rendezvous.patient.user`);
   }
 
-  // AJOUT: Méthode pour récupérer les paiements du patient connecté
-  getMesPaiements() {
-    return this.http.get<Paiement[]>(`${this.URL}/mes-paiements`);
-  }
 }

@@ -36,9 +36,9 @@ export class DossierMedicalComponent implements OnInit {
   groupesSanguins = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
   constructor(
-      private dossierMedicalService: DossierMedicalService,
-      private patientService: PatientService,
-      private router: Router
+    private dossierMedicalService: DossierMedicalService,
+    private patientService: PatientService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -79,7 +79,7 @@ export class DossierMedicalComponent implements OnInit {
 
     if (this.selectedGroupeSanguin) {
       filtered = filtered.filter(d =>
-          d.groupe_sanguin === this.selectedGroupeSanguin
+        d.groupe_sanguin === this.selectedGroupeSanguin
       );
     }
 
@@ -167,4 +167,17 @@ export class DossierMedicalComponent implements OnInit {
       }
     });
   }
+
+  getInitials(dossier: DossierMedical): string {
+    const name = this.getPatientName(dossier);
+    if (name === 'Patient inconnu') return '??';
+
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  }
 }
+
+
