@@ -52,6 +52,10 @@ export class UserComponent implements OnInit {
   // Contrôle affichage spécialité
   showSpecialiteField: boolean = false;
 
+  // Contrôle visibilité mot de passe
+  showPassword: boolean = false;
+  showPasswordConfirmation: boolean = false;
+
   // Nouvel utilisateur
   newUser: any = {
     nom: '',
@@ -99,7 +103,13 @@ export class UserComponent implements OnInit {
     });
   }
 
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
 
+  togglePasswordConfirmationVisibility(): void {
+    this.showPasswordConfirmation = !this.showPasswordConfirmation;
+  }
 
   onRoleChange(): void {
     const role = this.newUser.role;
@@ -192,6 +202,8 @@ export class UserComponent implements OnInit {
     this.isEditing = false;
     this.selectedUser = null;
     this.showSpecialiteField = false;
+    this.showPassword = false;
+    this.showPasswordConfirmation = false;
     this.newUser = {
       nom: '',
       prenom: '',
@@ -207,9 +219,41 @@ export class UserComponent implements OnInit {
   }
 
   openEditUserModal(user: User): void {
+    // Demander confirmation avec SweetAlert2
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        title: 'Modifier l\'utilisateur',
+        html: `Voulez-vous modifier <strong>${user.prenom} ${user.nom}</strong> ?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3B82F6',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: 'Oui, modifier',
+        cancelButtonText: 'Annuler',
+        customClass: {
+          popup: 'rounded-2xl',
+          confirmButton: 'rounded-xl px-6 py-3 font-semibold',
+          cancelButton: 'rounded-xl px-6 py-3 font-semibold'
+        }
+      }).then((result: { isConfirmed: boolean }) => {
+        if (result.isConfirmed) {
+          this.proceedToEdit(user);
+        }
+      });
+    } else {
+      // Fallback si SweetAlert2 n'est pas disponible
+      if (confirm(`Voulez-vous modifier ${user.prenom} ${user.nom} ?`)) {
+        this.proceedToEdit(user);
+      }
+    }
+  }
+
+  private proceedToEdit(user: User): void {
     this.isEditing = true;
     this.selectedUser = user;
     this.showSpecialiteField = user.role === 'medecin';
+    this.showPassword = false;
+    this.showPasswordConfirmation = false;
     this.newUser = {
       nom: user.nom,
       prenom: user.prenom,
@@ -217,6 +261,8 @@ export class UserComponent implements OnInit {
       role: user.role,
       telephone: user.telephone || '',
       adresse: user.adresse || '',
+      password: '',
+      password_confirmation: ''
     };
     this.showUserModal = true;
   }
@@ -226,6 +272,8 @@ export class UserComponent implements OnInit {
     this.selectedUser = null;
     this.isEditing = false;
     this.showSpecialiteField = false;
+    this.showPassword = false;
+    this.showPasswordConfirmation = false;
   }
 
   saveUser(): void {
@@ -234,6 +282,37 @@ export class UserComponent implements OnInit {
     } else {
       this.createUser();
     }
+  }
+
+  private showSnackbar(message: string, type: 'success' | 'error' | 'info' = 'success'): void {
+    const bgColors = {
+      success: 'bg-green-500',
+      error: 'bg-red-500',
+      info: 'bg-blue-500'
+    };
+
+    const snackbar = document.createElement('div');
+    snackbar.className = `fixed bottom-6 right-6 ${bgColors[type]} text-white px-6 py-4 rounded-xl shadow-2xl z-[9999] flex items-center gap-3 animate-slide-in-right`;
+    snackbar.innerHTML = `
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        ${type === 'success'
+      ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>'
+      : type === 'error'
+        ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>'
+        : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
+    }
+      </svg>
+      <span class="font-semibold">${message}</span>
+    `;
+
+    document.body.appendChild(snackbar);
+
+    setTimeout(() => {
+      snackbar.classList.add('animate-slide-out-right');
+      setTimeout(() => {
+        document.body.removeChild(snackbar);
+      }, 300);
+    }, 3000);
   }
 
   createUser(): void {
@@ -247,42 +326,13 @@ export class UserComponent implements OnInit {
 
     this.authService.register(userData).subscribe({
       next: (response) => {
-        // Utiliser SweetAlert2 si disponible
-        if (typeof Swal !== 'undefined') {
-          Swal.fire({
-            title: 'Succès !',
-            text: 'Utilisateur créé avec succès',
-            icon: 'success',
-            timer: 2000,
-            showConfirmButton: false,
-            customClass: {
-              popup: 'rounded-2xl'
-            }
-          });
-        } else {
-          this.successMessage = 'Utilisateur créé avec succès';
-          setTimeout(() => this.successMessage = '', 3000);
-        }
+        this.showSnackbar('Utilisateur créé avec succès', 'success');
         this.closeUserModal();
         this.loadUsers();
         this.isLoading = false;
       },
       error: (error) => {
-        // Utiliser SweetAlert2 si disponible
-        if (typeof Swal !== 'undefined') {
-          Swal.fire({
-            title: 'Erreur',
-            text: 'Une erreur est survenue lors de la création',
-            icon: 'error',
-            confirmButtonColor: '#3B82F6',
-            customClass: {
-              popup: 'rounded-2xl',
-              confirmButton: 'rounded-xl px-6 py-3 font-semibold'
-            }
-          });
-        } else {
-          this.errorMessage = 'Erreur lors de la création de l\'utilisateur';
-        }
+        this.showSnackbar('Erreur lors de la création de l\'utilisateur', 'error');
         this.isLoading = false;
         console.error('Erreur:', error);
       }
@@ -308,42 +358,13 @@ export class UserComponent implements OnInit {
 
     this.authService.updateUser(this.selectedUser.id, updateData).subscribe({
       next: (response) => {
-        // Utiliser SweetAlert2 si disponible
-        if (typeof Swal !== 'undefined') {
-          Swal.fire({
-            title: 'Succès !',
-            text: 'Utilisateur modifié avec succès',
-            icon: 'success',
-            timer: 2000,
-            showConfirmButton: false,
-            customClass: {
-              popup: 'rounded-2xl'
-            }
-          });
-        } else {
-          this.successMessage = 'Utilisateur modifié avec succès';
-          setTimeout(() => this.successMessage = '', 3000);
-        }
+        this.showSnackbar('Utilisateur modifié avec succès', 'success');
         this.closeUserModal();
         this.loadUsers();
         this.isLoading = false;
       },
       error: (error) => {
-        // Utiliser SweetAlert2 si disponible
-        if (typeof Swal !== 'undefined') {
-          Swal.fire({
-            title: 'Erreur',
-            text: 'Une erreur est survenue lors de la modification',
-            icon: 'error',
-            confirmButtonColor: '#3B82F6',
-            customClass: {
-              popup: 'rounded-2xl',
-              confirmButton: 'rounded-xl px-6 py-3 font-semibold'
-            }
-          });
-        } else {
-          this.errorMessage = 'Erreur lors de la modification de l\'utilisateur';
-        }
+        this.showSnackbar('Erreur lors de la modification de l\'utilisateur', 'error');
         this.isLoading = false;
         console.error('Erreur:', error);
       }
@@ -371,29 +392,11 @@ export class UserComponent implements OnInit {
         if (result.isConfirmed) {
           this.authService.deleteUser(user.id).subscribe({
             next: () => {
-              Swal.fire({
-                title: 'Supprimé !',
-                text: 'L\'utilisateur a été supprimé avec succès',
-                icon: 'success',
-                timer: 2000,
-                showConfirmButton: false,
-                customClass: {
-                  popup: 'rounded-2xl'
-                }
-              });
+              this.showSnackbar('Utilisateur supprimé avec succès', 'success');
               this.loadUsers();
             },
             error: (error) => {
-              Swal.fire({
-                title: 'Erreur',
-                text: 'Une erreur est survenue lors de la suppression',
-                icon: 'error',
-                confirmButtonColor: '#3B82F6',
-                customClass: {
-                  popup: 'rounded-2xl',
-                  confirmButton: 'rounded-xl px-6 py-3 font-semibold'
-                }
-              });
+              this.showSnackbar('Erreur lors de la suppression de l\'utilisateur', 'error');
               console.error('Erreur:', error);
             }
           });
@@ -404,12 +407,11 @@ export class UserComponent implements OnInit {
       if (confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${user.prenom} ${user.nom} ?`)) {
         this.authService.deleteUser(user.id).subscribe({
           next: () => {
-            this.successMessage = 'Utilisateur supprimé avec succès';
+            this.showSnackbar('Utilisateur supprimé avec succès', 'success');
             this.loadUsers();
-            setTimeout(() => this.successMessage = '', 3000);
           },
           error: (error) => {
-            this.errorMessage = 'Erreur lors de la suppression de l\'utilisateur';
+            this.showSnackbar('Erreur lors de la suppression de l\'utilisateur', 'error');
             console.error('Erreur:', error);
           }
         });
@@ -434,8 +436,6 @@ export class UserComponent implements OnInit {
       patient: this.users.filter(u => u.role === 'patient').length
     };
   }
-
-
 
   protected readonly Math = Math;
 

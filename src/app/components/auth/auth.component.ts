@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { UserRole } from '../../models/enum';
 import { CommonModule } from '@angular/common';
-import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-auth',
@@ -19,6 +18,11 @@ export class AuthComponent implements OnInit {
   submitted = false;
   showLogin = true;
   isLoading = false;
+
+  // Variables pour afficher/masquer les mots de passe
+  showLoginPassword = false;
+  showRegisterPassword = false;
+  showRegisterPasswordConfirmation = false;
 
   loginForm: FormGroup = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
@@ -51,6 +55,19 @@ export class AuthComponent implements OnInit {
     this.submitted = false;
   }
 
+  // Méthodes pour toggle l'affichage des mots de passe
+  toggleLoginPassword(): void {
+    this.showLoginPassword = !this.showLoginPassword;
+  }
+
+  toggleRegisterPassword(): void {
+    this.showRegisterPassword = !this.showRegisterPassword;
+  }
+
+  toggleRegisterPasswordConfirmation(): void {
+    this.showRegisterPasswordConfirmation = !this.showRegisterPasswordConfirmation;
+  }
+
   login(): void {
     this.submitted = true;
     if (this.loginForm.invalid) return;
@@ -61,7 +78,6 @@ export class AuthComponent implements OnInit {
       next: (response) => {
         this.isLoading = false;
 
-        // ✅ CORRECTION: Accéder aux données via response.data
         if (response.data && response.data.access_token) {
           localStorage.setItem('access_token', response.data.access_token);
           localStorage.setItem('user', JSON.stringify(response.data.user));
@@ -70,51 +86,16 @@ export class AuthComponent implements OnInit {
           console.log('Token stocké:', response.data.access_token);
           console.log('Utilisateur stocké:', response.data.user);
 
-          // 🎉 Afficher la notification SweetAlert2 au centre
-          Swal.fire({
-            icon: 'success',
-            title: 'Connexion réussie !',
-            text: `Bienvenue ${response.data.user.prenom || response.data.user.nom || ''}`,
-            confirmButtonText: 'Continuer',
-            confirmButtonColor: '#3B82F6',
-            timer: 3000,
-            timerProgressBar: true,
-            position: 'center',
-            showClass: {
-              popup: 'animate__animated animate__fadeInDown'
-            },
-            hideClass: {
-              popup: 'animate__animated animate__fadeOutUp'
-            }
-          }).then(() => {
-            this.router.navigate(['/dashboard']);
-          });
+          // Navigation directe vers le dashboard
+          this.router.navigate(['/dashboard']);
         } else {
           console.error('Structure de réponse invalide:', response);
-          Swal.fire({
-            icon: 'error',
-            title: 'Erreur',
-            text: 'Structure de réponse invalide',
-            confirmButtonColor: '#3B82F6',
-            position: 'center'
-          });
         }
       },
       error: (error) => {
         this.isLoading = false;
         console.error('Erreur login:', error);
-
-        // ✅ Gestion améliorée des erreurs avec SweetAlert
-        const errorMessage = error.error?.message || 'Erreur de connexion. Veuillez vérifier vos identifiants.';
-
-        Swal.fire({
-          icon: 'error',
-          title: 'Échec de connexion',
-          text: errorMessage,
-          confirmButtonColor: '#3B82F6',
-          confirmButtonText: 'Réessayer',
-          position: 'center'
-        });
+        alert(error.error?.message || 'Erreur de connexion. Veuillez vérifier vos identifiants.');
       }
     });
   }
@@ -123,25 +104,13 @@ export class AuthComponent implements OnInit {
     this.submitted = true;
 
     if (this.registerForm.invalid) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Formulaire incomplet',
-        text: 'Veuillez remplir tous les champs requis correctement',
-        confirmButtonColor: '#3B82F6',
-        position: 'center'
-      });
+      alert('Veuillez remplir tous les champs requis correctement');
       return;
     }
 
     // Vérification de la confirmation du mot de passe
     if (this.registerForm.value.password !== this.registerForm.value.password_confirmation) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Erreur',
-        text: 'Les mots de passe ne correspondent pas',
-        confirmButtonColor: '#3B82F6',
-        position: 'center'
-      });
+      alert('Les mots de passe ne correspondent pas');
       return;
     }
 
@@ -151,58 +120,22 @@ export class AuthComponent implements OnInit {
       next: (response) => {
         this.isLoading = false;
 
-        // ✅ CORRECTION: Accéder aux données via response.data
         if (response.data && response.data.access_token) {
           localStorage.setItem('access_token', response.data.access_token);
           localStorage.setItem('user', JSON.stringify(response.data.user));
 
           console.log('Inscription réussie:', response);
 
-          // 🎉 Afficher la notification SweetAlert2 au centre
-          Swal.fire({
-            icon: 'success',
-            title: 'Inscription réussie !',
-            text: `Bienvenue ${response.data.user.prenom || response.data.user.nom || ''}`,
-            confirmButtonText: 'Continuer',
-            confirmButtonColor: '#3B82F6',
-            timer: 3000,
-            timerProgressBar: true,
-            position: 'center',
-            showClass: {
-              popup: 'animate__animated animate__fadeInDown'
-            },
-            hideClass: {
-              popup: 'animate__animated animate__fadeOutUp'
-            }
-          }).then(() => {
-            this.router.navigate(['/medecins']);
-          });
+          // Navigation directe vers le dashboard
+          this.router.navigate(['/dashboard']);
         } else {
           console.error('Structure de réponse invalide:', response);
-          Swal.fire({
-            icon: 'warning',
-            title: 'Attention',
-            text: 'Inscription réussie mais structure de réponse invalide',
-            confirmButtonColor: '#3B82F6',
-            position: 'center'
-          });
         }
       },
       error: (error) => {
         this.isLoading = false;
         console.error('Erreur register:', error);
-
-        // ✅ Gestion améliorée des erreurs avec SweetAlert
-        const errorMessage = error.error?.message || 'Erreur lors de l\'inscription';
-
-        Swal.fire({
-          icon: 'error',
-          title: 'Échec de l\'inscription',
-          text: errorMessage,
-          confirmButtonColor: '#3B82F6',
-          confirmButtonText: 'Réessayer',
-          position: 'center'
-        });
+        alert(error.error?.message || 'Erreur lors de l\'inscription');
       }
     });
   }
