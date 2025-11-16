@@ -15,7 +15,9 @@ import { RouterModule, Routes } from '@angular/router';
  import { PatientComponent } from './components/admin/patient/patient.component';
 
 
-import { RendezvousComponent } from './components/secretaire/rendez-vous/rendez-vous.component';
+import {
+  CalendarRendezvousComponent,
+} from './components/secretaire/rendez-vous/rendez-vous.component';
  import { ConsultationComponent } from './components/admin/consultation/consultation.component';
  import { AddConsultationComponent } from './components/admin/consultation/add-consultation.component';
  import { CompteRenduComponent } from './components/admin/compte-rendu/compte-rendu.component';
@@ -49,7 +51,7 @@ const routes: Routes = [
   { path: 'departements', component: DepartementComponent },
   { path: 'dashboard', component: DashboardComponent },
    { path: 'specialites', component: SpecialiteComponent },
-
+  {path: 'rendez-vous-calendar', component: CalendarRendezvousComponent},
 
    // Personnel Médical
    { path: 'medecins', component: MedecinComponent },
@@ -89,9 +91,9 @@ const routes: Routes = [
   // { path: 'sec-paiements', component: SecretairePaiementComponent },
   // { path: 'sec-dossier-medicaux', component: SecretaireDossierMedicalComponent },
 
+  { path: 'rendez-vous-calendar', component: CalendarRendezvousComponent },
 
   // Gestion des Consultations
-  { path: 'rendez-vous', component: RendezvousComponent },
   { path: 'rendez-vous/add', component: AddRendezVousComponent },
   { path: 'rendez-vous/edit/:id', component: AddRendezVousComponent },
 

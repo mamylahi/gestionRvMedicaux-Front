@@ -20,11 +20,101 @@
         </div>
       </div>
 
-      <div class="max-w-2xl mx-auto">
+      <div class="max-w-3xl mx-auto">
         <!-- Formulaire -->
         <div class="bg-white rounded-xl shadow-md border border-gray-200">
           <form #paiementForm="ngForm" (ngSubmit)="save()">
             <div class="p-6 space-y-6">
+
+              <!-- Sélection du patient -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <span class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    Patient
+                    <span class="text-red-500">*</span>
+                  </span>
+                </label>
+                <select
+                  id="patient_id"
+                  name="patient_id"
+                  [(ngModel)]="selectedPatientId"
+                  (ngModelChange)="onPatientChange()"
+                  required
+                  #patientId="ngModel"
+                  class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-sm"
+                  [class.border-red-500]="patientId.invalid && patientId.touched">
+                  <option value="">Sélectionnez un patient</option>
+                  <option *ngFor="let patient of patients" [value]="patient.id">
+                    {{ patient.nom }} {{ patient.prenom }} - {{ patient.telephone }}
+                  </option>
+                </select>
+                <p *ngIf="patientId.invalid && patientId.touched" class="mt-1 text-xs text-red-600">
+                  Veuillez sélectionner un patient
+                </p>
+              </div>
+
+              <!-- Sélection de la consultation -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <span class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    Consultation
+                    <span class="text-red-500">*</span>
+                  </span>
+                </label>
+                <select
+                  id="consultation_id"
+                  name="consultation_id"
+                  [(ngModel)]="paiement.consultation_id"
+                  required
+                  [disabled]="!selectedPatientId || consultations.length === 0"
+                  #consultationId="ngModel"
+                  class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  [class.border-red-500]="consultationId.invalid && consultationId.touched">
+                  <option value="">Sélectionnez une consultation</option>
+                  <option *ngFor="let consultation of consultations" [value]="consultation.id">
+                    Consultation #{{ consultation.id }} - {{ consultation.date_consultation | date:'dd/MM/yyyy' }}
+                    <span *ngIf="consultation.statut_paiement === 'payé'"> (Déjà payée)</span>
+                  </option>
+                </select>
+                <p *ngIf="!selectedPatientId" class="mt-1 text-xs text-gray-500">
+                  Sélectionnez d'abord un patient
+                </p>
+                <p *ngIf="selectedPatientId && consultations.length === 0" class="mt-1 text-xs text-orange-600">
+                  Aucune consultation trouvée pour ce patient
+                </p>
+                <p *ngIf="consultationId.invalid && consultationId.touched" class="mt-1 text-xs text-red-600">
+                  Veuillez sélectionner une consultation
+                </p>
+              </div>
+
+              <!-- Informations de la consultation sélectionnée -->
+              <div *ngIf="selectedConsultation" class="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4">
+                <div class="flex items-start">
+                  <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <div class="flex-1">
+                    <p class="text-blue-800 font-semibold text-sm">Détails de la consultation</p>
+                    <div class="mt-2 space-y-1 text-sm text-blue-700">
+                      <p><span class="font-medium">Date:</span> {{ selectedConsultation.date_consultation | date:'dd/MM/yyyy à HH:mm' }}</p>
+                      <p><span class="font-medium">Motif:</span> {{ selectedConsultation.motif }}</p>
+                      <p *ngIf="selectedConsultation.statut_paiement">
+                        <span class="font-medium">Statut paiement:</span>
+                        <span [class.text-green-700]="selectedConsultation.statut_paiement === 'payé'"
+                              [class.text-orange-700]="selectedConsultation.statut_paiement === 'non_payé'">
+                          {{ selectedConsultation.statut_paiement }}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               <!-- Montant -->
               <div>
@@ -46,7 +136,8 @@
                   [(ngModel)]="paiement.montant"
                   #montant="ngModel"
                   class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
-                  [class.border-red-500]="montant.invalid && montant.touched">
+                  [class.border-red-500]="montant.invalid && montant.touched"
+                  placeholder="Entrez le montant">
                 <p *ngIf="montant.invalid && montant.touched" class="mt-1 text-xs text-red-600">
                   Le montant est requis et doit être positif
                 </p>
@@ -77,11 +168,42 @@
                 </p>
               </div>
 
+              <!-- Moyen de paiement -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <span class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                    </svg>
+                    Moyen de paiement
+                    <span class="text-red-500">*</span>
+                  </span>
+                </label>
+                <select
+                  id="moyen_paiement"
+                  name="moyen_paiement"
+                  [(ngModel)]="paiement.moyen_paiement"
+                  required
+                  #moyenPaiement="ngModel"
+                  class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-sm"
+                  [class.border-red-500]="moyenPaiement.invalid && moyenPaiement.touched">
+                  <option value="">Sélectionnez un moyen</option>
+                  <option value="espece">Espèces</option>
+                  <option value="carte">Carte bancaire</option>
+                  <option value="mobile_money">Paiement mobile</option>
+                  <option value="virement">Virement bancaire</option>
+                  <option value="cheque">Chèque</option>
+                </select>
+                <p *ngIf="moyenPaiement.invalid && moyenPaiement.touched" class="mt-1 text-xs text-red-600">
+                  Le moyen de paiement est requis
+                </p>
+              </div>
+
               <!-- Statut -->
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                   <span class="flex items-center gap-2">
-                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                     Statut
@@ -102,45 +224,6 @@
                 <p *ngIf="statut.invalid && statut.touched" class="mt-1 text-xs text-red-600">
                   Le statut est requis
                 </p>
-              </div>
-
-              <!-- ID Consultation -->
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                  <span class="flex items-center gap-2">
-                    <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                    </svg>
-                    ID Consultation
-                    <span class="text-red-500">*</span>
-                  </span>
-                </label>
-                <input
-                  type="number"
-                  id="consultation_id"
-                  name="consultation_id"
-                  required
-                  min="1"
-                  [(ngModel)]="paiement.consultation_id"
-                  #consultationId="ngModel"
-                  class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
-                  [class.border-red-500]="consultationId.invalid && consultationId.touched">
-                <p *ngIf="consultationId.invalid && consultationId.touched" class="mt-1 text-xs text-red-600">
-                  L'ID de consultation est requis
-                </p>
-              </div>
-
-              <!-- Info -->
-              <div class="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4">
-                <div class="flex items-start">
-                  <svg class="w-5 h-5 text-blue-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  <div>
-                    <p class="text-blue-800 font-semibold text-sm">Information</p>
-                    <p class="text-blue-700 text-sm mt-1">Assurez-vous que l'ID de consultation correspond à une consultation existante dans le système.</p>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -165,7 +248,7 @@
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                   </svg>
-                  Enregistrer
+                  Enregistrer le paiement
                 </span>
               </button>
             </div>

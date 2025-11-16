@@ -21,7 +21,10 @@ import {PatientDossierMedicalComponent} from './components/patient/dossier-medic
 import {PatientPaiementsComponent} from './components/patient/paiement/paiement.component';
 import {PatientRendezVousComponent} from './components/patient/rendez-vous/rendez-vous.component';
 import {ProfileComponent} from './components/profile/profile.component';
-import {RendezvousComponent} from './components/secretaire/rendez-vous/rendez-vous.component';
+import {
+  CalendarRendezvousComponent,
+
+} from './components/secretaire/rendez-vous/rendez-vous.component';
 import {CommonModule} from '@angular/common';
 
 @NgModule({
@@ -54,7 +57,7 @@ import {CommonModule} from '@angular/common';
     PatientPaiementsComponent,
     PatientRendezVousComponent,
     ProfileComponent,
-    RendezvousComponent,
+    CalendarRendezvousComponent,
 
 
 

@@ -114,7 +114,7 @@
               </div>
             </div>
 
-            <!-- Consultation -->
+            <!-- Consultation avec badge de type -->
             <div class="flex items-center gap-2 text-sm">
               <div class="w-7 h-7 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
                 <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -122,8 +122,21 @@
                 </svg>
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-xs text-gray-500">Consultation</p>
-                <p class="text-sm text-gray-800 font-medium">#{{ paiement.consultation_id }}</p>
+                <div class="flex items-center gap-2">
+                  <p class="text-xs text-gray-500">Patient</p>
+                  <!-- Badge du type de consultation -->
+                  <span *ngIf="hasRendezVous(paiement)"
+                        class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-100 text-purple-700"
+                        title="Consultation avec rendez-vous">
+                    📅 RDV
+                  </span>
+                  <span *ngIf="isSpontaneous(paiement)"
+                        class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-orange-100 text-orange-700"
+                        title="Consultation spontanée">
+                    ⚡ Spontanée
+                  </span>
+                </div>
+                <p class="text-sm text-gray-800 font-medium">{{ getPatientName(paiement) }}</p>
               </div>
             </div>
 

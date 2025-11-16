@@ -6,8 +6,8 @@ export class Paiement {
   consultation_id!: number;
   consultation?: Consultation;
   montant!: number;
-  date_paiement!: Date;
-  moyen_paiement!: MoyenPaiement;
+  date_paiement!: string;
+  moyen_paiement!: string;
   statut!: StatutPaiement;
   created_at?: Date;
   updated_at?: Date;
