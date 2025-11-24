@@ -89,7 +89,6 @@ const routes: Routes = [
   // { path: 'rendez-vous/add', component: AddRendezVousComponent},
   // { path: 'rendez-vous/edit/:id', component: AddRendezVousComponent},
   // { path: 'sec-paiements', component: SecretairePaiementComponent },
-  // { path: 'sec-dossier-medicaux', component: SecretaireDossierMedicalComponent },
 
   { path: 'rendez-vous-calendar', component: CalendarRendezvousComponent },
 
