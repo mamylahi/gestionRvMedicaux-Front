@@ -16,6 +16,7 @@ declare var Swal: any;
     NgForOf,
     CommonModule
   ],
+  standalone: true
 })
 export class MedecinRendezVousComponent implements OnInit {
   rendezVous: RendezVous[] = [];

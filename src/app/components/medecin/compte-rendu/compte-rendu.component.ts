@@ -11,6 +11,7 @@ declare var Swal: any;
 @Component({
   selector: 'app-compte-rendu',
   templateUrl: './compte-rendu.component.html',
+  standalone: true,
   imports: [CommonModule, AddCompteRenduComponent]
 })
 export class MedecinCompteRenduComponent implements OnInit {

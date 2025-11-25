@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-dossier-medical',
   templateUrl: './dossier-medical.component.html',
+  standalone: true,
   imports: [
     DatePipe,
     CommonModule,

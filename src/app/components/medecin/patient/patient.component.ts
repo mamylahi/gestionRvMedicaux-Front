@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-patient',
   templateUrl: './patient.component.html',
+  standalone: true,
   imports: [CommonModule]
 })
 export class MedecinPatientComponent implements OnInit {
