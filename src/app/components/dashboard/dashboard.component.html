@@ -773,7 +773,7 @@
                     [class.border-gray-300]="medecinControl?.valid || !medecinControl?.touched">
               <option value="">-- Choisir un médecin --</option>
               <option *ngFor="let medecin of medecins" [value]="medecin.id">
-                Dr. {{ medecin.nom }} {{ medecin.prenom }} - {{ medecin.specialite }}
+                Dr. {{ medecin.user?.nom || 'N/A' }} {{ medecin.user?.prenom || '' }} - {{ medecin.specialite?.nom || 'Généraliste' }}
               </option>
             </select>
             <div *ngIf="loadingMedecins" class="absolute right-3 top-1/2 transform -translate-y-1/2">

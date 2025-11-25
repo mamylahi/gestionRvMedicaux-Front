@@ -315,12 +315,14 @@ export class DashboardComponent implements OnInit {
   loadMedecins() {
     this.loadingMedecins = true;
     this.medecinService.getAll().subscribe({
-      next: (response: any) => {
-        this.medecins = Array.isArray(response) ? response : (response.data || []);
+      next: (data: any) => {
+        // Extraire les médecins selon le format de la réponse
+        this.medecins = data.data || data || [];
+        console.log('✅ Médecins chargés:', this.medecins.length);
         this.loadingMedecins = false;
       },
       error: (error) => {
-        console.error('Erreur chargement médecins:', error);
+        console.error('❌ Erreur lors du chargement des médecins:', error);
         this.errorMessage = 'Erreur lors du chargement des médecins';
         this.loadingMedecins = false;
       }
@@ -379,4 +381,13 @@ export class DashboardComponent implements OnInit {
   get dateControl() { return this.rdvForm.get('date_rendezvous'); }
   get heureControl() { return this.rdvForm.get('heure_rendezvous'); }
   get motifControl() { return this.rdvForm.get('motif'); }
+
+  // Méthode utilitaire pour formater le label du médecin
+  getMedecinLabel(medecin: any): string {
+    if (medecin.user) {
+      const specialite = medecin.specialite?.nom || 'Généraliste';
+      return `Dr. ${medecin.user.nom} ${medecin.user.prenom} - ${specialite}`;
+    }
+    return `Médecin #${medecin.id}`;
+  }
 }
