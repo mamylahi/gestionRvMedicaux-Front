@@ -561,7 +561,7 @@
   <!-- ==================== DASHBOARD PATIENT ==================== -->
   <div *ngIf="!loading && isPatient" class="space-y-8 animate-fade-in">
     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-      <!-- Cartes patient avec même style moderne -->
+      <!-- Cartes statistiques patient -->
       <div class="group relative">
         <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-400 to-cyan-600 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
         <div class="relative bg-white/90 backdrop-blur-xl rounded-2xl p-6 border border-white/50 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
@@ -665,7 +665,7 @@
 
     <!-- Actions patient -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <a routerLink="/mes-rendez-vous" class="bg-white/90 backdrop-blur-xl rounded-2xl p-8 border border-white/50 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+      <button (click)="openModalRDV()" class="bg-white/90 backdrop-blur-xl rounded-2xl p-8 border border-white/50 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer text-left">
         <div class="flex items-center space-x-6">
           <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl flex items-center justify-center shadow-xl flex-shrink-0">
             <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -677,7 +677,7 @@
             <p class="text-gray-600 text-sm">Réserver un nouveau rendez-vous</p>
           </div>
         </div>
-      </a>
+      </button>
 
       <a routerLink="/mon-dossier" class="bg-white/90 backdrop-blur-xl rounded-2xl p-8 border border-white/50 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
         <div class="flex items-center space-x-6">
@@ -710,6 +710,151 @@
   </div>
 </div>
 
+<!-- ==================== MODAL PRISE DE RDV ==================== -->
+<div *ngIf="showModalRDV" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+  <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all animate-scale-in">
+    <!-- Header du modal -->
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 rounded-t-3xl relative overflow-hidden">
+      <div class="absolute inset-0 opacity-10">
+        <div class="absolute top-0 right-0 w-40 h-40 bg-white rounded-full blur-3xl"></div>
+      </div>
+      <div class="relative z-10 flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <div class="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-2xl font-bold text-white">Nouveau Rendez-vous</h2>
+            <p class="text-blue-100 text-sm">Réservez votre consultation</p>
+          </div>
+        </div>
+        <button (click)="closeModalRDV()" class="w-10 h-10 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl flex items-center justify-center transition-all">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Corps du modal -->
+    <div class="p-8">
+      <!-- Messages -->
+      <div *ngIf="successMessage" class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-xl">
+        <div class="flex items-center">
+          <svg class="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <p class="text-green-800 font-medium">{{ successMessage }}</p>
+        </div>
+      </div>
+
+      <div *ngIf="errorMessage" class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-xl">
+        <div class="flex items-center">
+          <svg class="w-6 h-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <p class="text-red-800 font-medium">{{ errorMessage }}</p>
+        </div>
+      </div>
+
+      <!-- Formulaire -->
+      <form [formGroup]="rdvForm" (ngSubmit)="submitRDV()" class="space-y-6">
+        <!-- Sélection du médecin -->
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">
+            Médecin *
+          </label>
+          <div class="relative">
+            <select formControlName="medecin_id"
+                    class="w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    [class.border-red-500]="medecinControl?.invalid && medecinControl?.touched"
+                    [class.border-gray-300]="medecinControl?.valid || !medecinControl?.touched">
+              <option value="">-- Choisir un médecin --</option>
+              <option *ngFor="let medecin of medecins" [value]="medecin.id">
+                Dr. {{ medecin.nom }} {{ medecin.prenom }} - {{ medecin.specialite }}
+              </option>
+            </select>
+            <div *ngIf="loadingMedecins" class="absolute right-3 top-1/2 transform -translate-y-1/2">
+              <div class="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          </div>
+          <p *ngIf="medecinControl?.invalid && medecinControl?.touched" class="mt-1 text-sm text-red-600">
+            Veuillez sélectionner un médecin
+          </p>
+        </div>
+
+        <!-- Date -->
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">
+            Date du rendez-vous *
+          </label>
+          <input type="date"
+                 formControlName="date_rendezvous"
+                 [min]="'now' | date:'yyyy-MM-dd'"
+                 class="w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                 [class.border-red-500]="dateControl?.invalid && dateControl?.touched"
+                 [class.border-gray-300]="dateControl?.valid || !dateControl?.touched">
+          <p *ngIf="dateControl?.invalid && dateControl?.touched" class="mt-1 text-sm text-red-600">
+            Veuillez sélectionner une date
+          </p>
+        </div>
+
+        <!-- Heure -->
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">
+            Heure du rendez-vous *
+          </label>
+          <input type="time"
+                 formControlName="heure_rendezvous"
+                 class="w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                 [class.border-red-500]="heureControl?.invalid && heureControl?.touched"
+                 [class.border-gray-300]="heureControl?.valid || !heureControl?.touched">
+          <p *ngIf="heureControl?.invalid && heureControl?.touched" class="mt-1 text-sm text-red-600">
+            Veuillez sélectionner une heure
+          </p>
+        </div>
+
+        <!-- Motif -->
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">
+            Motif de la consultation *
+          </label>
+          <textarea formControlName="motif"
+                    rows="4"
+                    placeholder="Décrivez brièvement le motif de votre consultation..."
+                    class="w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none"
+                    [class.border-red-500]="motifControl?.invalid && motifControl?.touched"
+                    [class.border-gray-300]="motifControl?.valid || !motifControl?.touched"></textarea>
+          <p *ngIf="motifControl?.invalid && motifControl?.touched" class="mt-1 text-sm text-red-600">
+            Le motif doit contenir au moins 10 caractères
+          </p>
+        </div>
+
+        <!-- Boutons -->
+        <div class="flex gap-4 pt-4">
+          <button type="button"
+                  (click)="closeModalRDV()"
+                  [disabled]="submittingRDV"
+                  class="flex-1 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-all">
+            Annuler
+          </button>
+          <button type="submit"
+                  [disabled]="rdvForm.invalid || submittingRDV"
+                  class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+            <span *ngIf="!submittingRDV">Réserver</span>
+            <span *ngIf="submittingRDV" class="flex items-center gap-2">
+              <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              En cours...
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <!-- Animations CSS -->
 <style>
   @keyframes float {
@@ -729,7 +874,13 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
   .animate-float { animation: float 20s ease-in-out infinite; }
   .animate-float-delayed { animation: float-delayed 25s ease-in-out infinite; }
   .animate-fade-in { animation: fadeIn 0.8s ease-out; }
+  .animate-scale-in { animation: scaleIn 0.3s ease-out; }
 </style>

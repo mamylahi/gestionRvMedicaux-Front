@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { StatistiqueService, StatistiquesAdmin } from '../../services/statistique.service';
 import { MedecinService } from '../../services/medecin.service';
@@ -15,7 +16,7 @@ import { catchError } from 'rxjs/operators';
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   standalone: true,
-  imports: [CommonModule, RouterModule]
+  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule]
 })
 export class DashboardComponent implements OnInit {
   isLoggedIn: boolean = false;
@@ -25,10 +26,20 @@ export class DashboardComponent implements OnInit {
   isPatient: boolean = false;
   userName: string = '';
   userRole: string = '';
+  userId: string = '';
 
   dashboardData: any = {};
   statistiquesAdmin?: StatistiquesAdmin;
   loading: boolean = true;
+
+  // Modal RDV
+  showModalRDV: boolean = false;
+  rdvForm!: FormGroup;
+  medecins: any[] = [];
+  loadingMedecins: boolean = false;
+  submittingRDV: boolean = false;
+  successMessage: string = '';
+  errorMessage: string = '';
 
   constructor(
     private authService: AuthService,
@@ -37,12 +48,24 @@ export class DashboardComponent implements OnInit {
     private patientService: PatientService,
     private rendezVousService: RendezVousService,
     private consultationService: ConsultationService,
-    private paiementService: PaiementService
-  ) {}
+    private paiementService: PaiementService,
+    private fb: FormBuilder
+  ) {
+    this.initRDVForm();
+  }
 
   ngOnInit() {
     this.checkAuthentication();
     this.getUserInfo();
+  }
+
+  initRDVForm() {
+    this.rdvForm = this.fb.group({
+      medecin_id: ['', Validators.required],
+      date_rendezvous: ['', Validators.required],
+      heure_rendezvous: ['', Validators.required],
+      motif: ['', [Validators.required, Validators.minLength(10)]]
+    });
   }
 
   checkAuthentication() {
@@ -57,6 +80,7 @@ export class DashboardComponent implements OnInit {
             ? `${user.data.nom} ${user.data.prenom}`
             : (user.data.name || 'Utilisateur');
           this.userRole = user.data.role;
+          this.userId = user.data.id;
           this.setUserRole(user.data.role);
           this.loadDashboardData(user);
         },
@@ -75,11 +99,9 @@ export class DashboardComponent implements OnInit {
     this.isMedecin = role === 'medecin';
     this.isSecretaire = role === 'secretaire';
     this.isPatient = role === 'patient';
-    console.log('User Role Set:', { isAdmin: this.isAdmin, isMedecin: this.isMedecin, isSecretaire: this.isSecretaire, isPatient: this.isPatient });
   }
 
   loadDashboardData(user: any) {
-
     if (this.isAdmin) {
       this.loadAdminDashboard();
     } else if (this.isMedecin) {
@@ -94,10 +116,8 @@ export class DashboardComponent implements OnInit {
   }
 
   loadAdminDashboard() {
-
     this.statistiqueService.getStatistiquesAdmin().subscribe({
       next: (response) => {
-
         if (response.success && response.data) {
           this.statistiquesAdmin = response.data;
           this.dashboardData = {
@@ -119,7 +139,6 @@ export class DashboardComponent implements OnInit {
         } else {
           this.setDefaultAdminData();
         }
-
         this.loading = false;
       },
       error: (error) => {
@@ -150,14 +169,12 @@ export class DashboardComponent implements OnInit {
   }
 
   loadMedecinDashboard(medecinId: string) {
-
     forkJoin({
       rendezVous: this.rendezVousService.getByMedecin(medecinId).pipe(catchError(() => of([] as any))),
       consultations: this.consultationService.getByMedecin(medecinId).pipe(catchError(() => of([] as any))),
       patients: this.rendezVousService.getByMedecin(medecinId).pipe(catchError(() => of([] as any)))
     }).subscribe({
       next: (data: any) => {
-
         const today = new Date().toDateString();
         const rendezVousData: any = data.rendezVous || [];
         const consultationsData: any = data.consultations || [];
@@ -204,14 +221,11 @@ export class DashboardComponent implements OnInit {
   }
 
   loadSecretaireDashboard() {
-    console.log('Loading secretaire dashboard...');
     forkJoin({
       rendezVous: this.rendezVousService.getAll().pipe(catchError(() => of([] as any))),
       paiements: this.paiementService.getAll().pipe(catchError(() => of([] as any)))
     }).subscribe({
       next: (data: any) => {
-        console.log('Secretaire data loaded:', data);
-
         const today = new Date().toDateString();
         const rendezVousData: any = data.rendezVous || [];
         const paiementsData: any = data.paiements || [];
@@ -234,7 +248,6 @@ export class DashboardComponent implements OnInit {
           totalPaiements: paiementsArray.length
         };
 
-        console.log('Secretaire dashboard data:', this.dashboardData);
         this.loading = false;
       },
       error: (error) => {
@@ -251,9 +264,6 @@ export class DashboardComponent implements OnInit {
   }
 
   loadPatientDashboard(patientId: string) {
-    console.log('Loading patient dashboard for ID:', patientId);
-
-    // Utilisez le service PatientService au lieu des services individuels
     forkJoin({
       dashboard: this.patientService.getDashboard(patientId).pipe(catchError(() => of({ data: { statistiques: {}, prochain_rendez_vous: null } }))),
       rendezVous: this.patientService.getMesRendezVous().pipe(catchError(() => of([]))),
@@ -261,8 +271,6 @@ export class DashboardComponent implements OnInit {
       paiements: this.patientService.getMesPaiements().pipe(catchError(() => of([])))
     }).subscribe({
       next: (data: any) => {
-        console.log('Patient dashboard data:', data);
-
         const dashboardData = data.dashboard?.data || {};
         const statistiques = dashboardData.statistiques || {};
 
@@ -274,7 +282,6 @@ export class DashboardComponent implements OnInit {
           prochainRendezVous: dashboardData.prochain_rendez_vous || null
         };
 
-        console.log('Patient dashboard data processed:', this.dashboardData);
         this.loading = false;
       },
       error: (error) => {
@@ -291,10 +298,85 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  // Méthodes pour le modal RDV
+  openModalRDV() {
+    this.showModalRDV = true;
+    this.loadMedecins();
+    this.resetMessages();
+    this.rdvForm.reset();
+  }
+
+  closeModalRDV() {
+    this.showModalRDV = false;
+    this.rdvForm.reset();
+    this.resetMessages();
+  }
+
+  loadMedecins() {
+    this.loadingMedecins = true;
+    this.medecinService.getAll().subscribe({
+      next: (response: any) => {
+        this.medecins = Array.isArray(response) ? response : (response.data || []);
+        this.loadingMedecins = false;
+      },
+      error: (error) => {
+        console.error('Erreur chargement médecins:', error);
+        this.errorMessage = 'Erreur lors du chargement des médecins';
+        this.loadingMedecins = false;
+      }
+    });
+  }
+
+  submitRDV() {
+    if (this.rdvForm.invalid) {
+      Object.keys(this.rdvForm.controls).forEach(key => {
+        this.rdvForm.get(key)?.markAsTouched();
+      });
+      return;
+    }
+
+    this.submittingRDV = true;
+    this.resetMessages();
+
+    const rdvData = {
+      ...this.rdvForm.value,
+      patient_id: this.userId,
+      statut: 'en_attente'
+    };
+
+    this.rendezVousService.create(rdvData).subscribe({
+      next: (response) => {
+        this.successMessage = 'Rendez-vous créé avec succès !';
+        this.submittingRDV = false;
+
+        setTimeout(() => {
+          this.closeModalRDV();
+          this.loadPatientDashboard(this.userId);
+        }, 2000);
+      },
+      error: (error) => {
+        console.error('Erreur création RDV:', error);
+        this.errorMessage = error.error?.message || 'Erreur lors de la création du rendez-vous';
+        this.submittingRDV = false;
+      }
+    });
+  }
+
+  resetMessages() {
+    this.successMessage = '';
+    this.errorMessage = '';
+  }
+
   getGreeting(): string {
     const hour = new Date().getHours();
     if (hour < 12) return 'Bonjour';
     if (hour < 18) return 'Bon après-midi';
     return 'Bonsoir';
   }
+
+  // Getters pour la validation du formulaire
+  get medecinControl() { return this.rdvForm.get('medecin_id'); }
+  get dateControl() { return this.rdvForm.get('date_rendezvous'); }
+  get heureControl() { return this.rdvForm.get('heure_rendezvous'); }
+  get motifControl() { return this.rdvForm.get('motif'); }
 }
