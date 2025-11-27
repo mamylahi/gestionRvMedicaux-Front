@@ -48,7 +48,7 @@ export class NavbarComponent implements OnInit {
   }
 
   getUserInfo() {
-    if (this.isLoggedIn) {
+    if (!this.isLoggedIn) {
       this.authService.getAuthenticatedUser().subscribe({
         next: (user) => {
           console.log('User data received in navbar:', user);
@@ -68,6 +68,16 @@ export class NavbarComponent implements OnInit {
           }
         }
       });
+    }else {
+      const currentUser = this.authService.getCurrentUser();
+      if (currentUser) {
+        this.userName = (currentUser.nom && currentUser.prenom)
+          ? `${currentUser.nom} ${currentUser.prenom}`
+          : (currentUser.nom || 'Utilisateur');
+        this.userEmail = currentUser.email || '';
+        this.userRole = currentUser.role;
+        this.setUserRole(currentUser.role);
+      }
     }
   }
 
